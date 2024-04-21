@@ -1,0 +1,29 @@
+Package: bssvd
+Type: Package
+Title: Make Scaled SVD Objects
+Version: 0.1.0
+Authors@R: 
+    person(given = "John",
+           family = "Bryant",
+           role = c("aut", "cre"),
+           email = "john@bayesiandemography.com")
+Description: Based on data from international demographic databases,
+  build objects of class "bage_ssvd", to be used with
+  package 'bage'. 'bssvd' is a developer-focused backage, and
+  would not normally be used directly for data analysis.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    bage,
+    cli,
+    poputils,
+    tibble
+Suggests: 
+    rsdmx,
+    testthat (>= 3.0.0)
+Remotes:
+    bayesiandemography/poputils,
+    bayesiandemography/bage
+Config/testthat/edition: 3
+RoxygenNote: 7.3.1
