@@ -6,19 +6,19 @@
 \title{OECD data on Labour Force Participation}
 \format{
 A tibble with 12069 rows and the following
-columns `TIME_PERIOD`, `REF_AREA`,
-`MEASURE`,`UNIT_MEASURE`, `SEX`, `AGE`,
-`LABOUR FORCE STATUS`, `obsValue`, `DECIMALS`,
-`OBS_STATUS`.
+columns \code{TIME_PERIOD}, \code{REF_AREA},
+\code{MEASURE},\code{UNIT_MEASURE}, \code{SEX}, \code{AGE},
+\verb{LABOUR FORCE STATUS}, \code{obsValue}, \code{DECIMALS},
+\code{OBS_STATUS}.
 }
 \source{
 Downloaded from table
 "Employment and unemployment by five-year
 age group and sex - indicators" from
-[OECD Data Explorer](https://data-explorer.oecd.org).
+\href{https://data-explorer.oecd.org}{OECD Data Explorer}.
 Accessed 21 April 2024.
 Only a subset of the full dataset is included
-in `oecd_lpr`.
+in \code{oecd_lpr}.
 }
 \usage{
 oecd_lfp

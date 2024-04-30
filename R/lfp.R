@@ -37,9 +37,9 @@
 #'   [`"bage_ssvd"`][bage::ssvd()] in a prior.
 #' @export
 ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
-  check_age_max_five(age_max = age_max,
-                     min = 15L,
-                     divisible_by = 5L)
+  check_age_max(age_max = age_max,
+                min = 15L,
+                divisible_by = 5L)
   check_n(n = n_comp,
           nm_n = "n_comp",
           min = 5L,
@@ -143,7 +143,7 @@ lfp_indep <- function(data, labels_age, n_comp) {
 
 
 ## HAS_TESTS
-#' Prepare Inputs for "joint" Type, ie Female and Male Combined
+#' Prepare Inputs for "joint" Type, ie Female and Male Concatenated
 #'
 #' @param data A data frame
 #' @param labels_age List of character vectors
@@ -158,7 +158,7 @@ lfp_joint <- function(data, labels_age, n_comp) {
   data_split <- .mapply(lfp_get_data_one,
                         dots = list(labels_age = labels_age),
                         MoreArgs = list(data = data))
-  order_sexage <- function(x) x[order(x$sex), ]
+  order_sexage <- function(x) x[order(x$sex, x$age), ]
   data_split <- lapply(data_split, order_sexage)
   x_split <- .mapply(poputils::to_matrix,
                      dots = list(x = data_split),
@@ -244,14 +244,20 @@ lfp_tidy <- function(data) {
   p_closed <- "^Y([0-9]+)T([0-9]+)$"
   ans$age <- sub(p_open, "\\1+", ans$age)
   ans$age <- sub(p_closed, "\\1-\\2", ans$age)
-  ans <- ans[!(ans$age %in% c("25-34",
+  ans <- ans[!(ans$age %in% c("15-24",
+                              "25-34",
                               "30-39",
                               "35-44",
                               "40-49",
                               "45-54",
                               "50-59",
                               "55-64",
-                              "65-74")), ]
+                              "65-74",
+                              "25-54",
+                              "25-64",
+                              "15-64",
+                              "20-64",
+                              "25-39")), ]
   ans$sex <- sub("^_T$", "Total", ans$sex)
   ans$sex <- sub("^F$", "Female", ans$sex)
   ans$sex <- sub("^M$", "Male", ans$sex)

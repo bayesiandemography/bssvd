@@ -2,8 +2,9 @@
 ## 'ssvd_lfp' -----------------------------------------------------------------
 
 test_that("'ssvd_lfp' works with valid inputs", {
-  fn <- file.path("data_for_tests", "OECD.ELS.SAE,DSD_LFS@DF_LFS_COMP,1.1+all.csv")
-  suppressMessages(ans <- ssvd_lfp(fn, age_open_max = 65))
+  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
+  data <- utils::read.csv(fn)
+  suppressMessages(ans <- ssvd_lfp(data, age_max = 65))
   expect_s3_class(ans, "bage_ssvd")
 })
 
@@ -23,7 +24,7 @@ test_that("'lfp_get_data_one' works", {
 
 
 ## 'lfp_indep' ----------------------------------------------------------------
-d
+
 test_that("'lfp_indep' works with valid inputs", {
   data <- expand.grid(country = 1:2,
                       sex = c("Female", "Male", "Total"),
@@ -84,14 +85,31 @@ test_that("'lfp_make_labels_age' works", {
 })
 
 
-## 'lfp_read_and_tidy' --------------------------------------------------------
+## 'lfp_tidy' --------------------------------------------------------
 
-test_that("'lfp_read_and_tidy' works with valid inputs", {
-  fn <- file.path("data_for_tests", "OECD.ELS.SAE,DSD_LFS@DF_LFS_COMP,1.1+all.csv")
-  ans <- lfp_read_and_tidy(fn)
+test_that("'lfp_tidy' works with valid inputs", {
+  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
+  data <- utils::read.csv(fn)
+  ans <- lfp_tidy(data)
   expect_setequal(names(ans),
                   c("country", "sex", "age", "time", "measure"))
   expect_true(tibble::is_tibble(ans))
+})
+
+test_that("'lfp_tidy' throws correct error when variable missing", {
+  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
+  data <- utils::read.csv(fn)
+  data <- data[-match("REF_AREA", names(data))]
+  expect_error(lfp_tidy(data),
+               "`data` does not have a column called \"REF_AREA\"")
+})
+
+test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
+  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
+  data <- utils::read.csv(fn)
+  data$SEX[4] <- "wrong"
+  expect_error(lfp_tidy(data),
+               "Invalid value for `sex`: \"wrong\"")
 })
 
 

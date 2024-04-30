@@ -10,42 +10,42 @@ ssvd_lfp(data, age_max = 75, n_comp = 5)
 \item{data}{A data frame containing OECD data.}
 
 \item{age_max}{The upper limit of the
-oldest closed age group. Default is `75`.}
+oldest closed age group. Default is \code{75}.}
 
 \item{n_comp}{Number of SVD components
-to include in result. Default is `5`.}
+to include in result. Default is \code{5}.}
 }
 \value{
-An object of class [`"bage_ssvd"`][ssvd()]
+An object of class \code{\link[=ssvd]{"bage_ssvd"}}
 }
 \description{
-Create an object of class [`"bage_ssvd"`][bage::ssvd()]
+Create an object of class \code{\link[bage:ssvd]{"bage_ssvd"}}
 from labour force participation data downloaded from
-the [OECD Data Explorer](https://data-explorer.oecd.org).
+the \href{https://data-explorer.oecd.org}{OECD Data Explorer}.
 }
 \section{Usage}{
 
-**Step 1: Download data**
+\strong{Step 1: Download data}
 
-```
-library(rsdmx)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{library(rsdmx)
 url <- paste("https://sdmx.oecd.org/public/rest/data",
              "OECD.ELS.SAE,DSD_LFS@DF_LFS_INDIC,1.1",
              "all?dimensionAtObservation=AllDimensions",
              sep = "/")
 lfp_sdmx <- rsdmx::readSDMX(url)    ## can be slow
 lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
-```
+}\if{html}{\out{</div>}}
 
-**Step 2: Call function 'svd_lfp'**
+\strong{Step 2: Call function 'svd_lfp'}
 
-```
-LFP <- svd_lfp(data)
-```
+\if{html}{\out{<div class="sourceCode">}}\preformatted{LFP <- svd_lfp(data)
+}\if{html}{\out{</div>}}
 }
 
 \seealso{
-- [bage::SVD()], [bage::SVDS()], [bage::ESVD()], [bage::ESVDS()]
-  to use an object of class
-  [`"bage_ssvd"`][bage::ssvd()] in a prior.
+\itemize{
+\item \code{\link[bage:SVD]{bage::SVD()}}, \code{\link[bage:SVDS]{bage::SVDS()}}, \code{\link[bage:ESVD]{bage::ESVD()}}, \code{\link[bage:ESVDS]{bage::ESVDS()}}
+to use an object of class
+\code{\link[bage:ssvd]{"bage_ssvd"}} in a prior.
+}
 }
