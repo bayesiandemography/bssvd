@@ -6,7 +6,7 @@
 \title{OECD data on Labour Force Participation}
 \format{
 A tibble with 12069 rows and the following
-columns \code{TIME_PERIOD}, \code{REF_AREA},
+columns: \code{TIME_PERIOD}, \code{REF_AREA},
 \code{MEASURE},\code{UNIT_MEASURE}, \code{SEX}, \code{AGE},
 \verb{LABOUR FORCE STATUS}, \code{obsValue}, \code{DECIMALS},
 \code{OBS_STATUS}.

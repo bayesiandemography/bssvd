@@ -44,5 +44,5 @@ url <- paste("https://sdmx.oecd.org/public/rest/data",
              sep = "/")
 lfp_sdmx <- rsdmx::readSDMX(url)
 lfp_df <- as.data.frame(lfp_sdmx)
-LFP <- svd_lfp(data)
+LFP <- ssvd_lfp(lfp_df)
 ```

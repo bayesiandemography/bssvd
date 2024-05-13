@@ -2,10 +2,32 @@
 ## 'ssvd_lfp' -----------------------------------------------------------------
 
 test_that("'ssvd_lfp' works with valid inputs", {
-  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
-  data <- utils::read.csv(fn)
-  suppressMessages(ans <- ssvd_lfp(data, age_max = 65))
+  suppressMessages(ans <- ssvd_lfp(oecd_lfp, age_max = 65))
   expect_s3_class(ans, "bage_ssvd")
+})
+
+
+## 'lfp_tidy' --------------------------------------------------------
+
+test_that("'lfp_tidy' works with valid inputs", {
+  ans <- lfp_tidy(oecd_lfp)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+})
+
+test_that("'lfp_tidy' throws correct error when variable missing", {
+  data <- oecd_lfp
+  data <- data[-match("REF_AREA", names(data))]
+  expect_error(lfp_tidy(data),
+               "`data` does not have a column called \"REF_AREA\"")
+})
+
+test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
+  data <- oecd_lfp
+  data$SEX[3] <- "wrong"
+  expect_error(lfp_tidy(data),
+               "Invalid value for `sex`: \"wrong\"")
 })
 
 
@@ -34,7 +56,7 @@ test_that("'lfp_indep' works with valid inputs", {
                                                  open = TRUE),
                               "60+"),
                       time = 2001:2005)
-  data$measure <- runif(n = nrow(data))
+  data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
   ans_obtained <- lfp_indep(data, labels_age = labels_age, n_comp = 5)
   expect_setequal(names(ans_obtained),
@@ -58,7 +80,7 @@ test_that("'lfp_joint' works with valid inputs", {
                                                  open = TRUE),
                               "60+"),
                       time = 2001:2005)
-  data$measure <- runif(n = nrow(data))
+  data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
   ans_obtained <- lfp_joint(data, labels_age = labels_age, n_comp = 5)
   expect_setequal(names(ans_obtained),
@@ -85,34 +107,6 @@ test_that("'lfp_make_labels_age' works", {
 })
 
 
-## 'lfp_tidy' --------------------------------------------------------
-
-test_that("'lfp_tidy' works with valid inputs", {
-  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
-  data <- utils::read.csv(fn)
-  ans <- lfp_tidy(data)
-  expect_setequal(names(ans),
-                  c("country", "sex", "age", "time", "measure"))
-  expect_true(tibble::is_tibble(ans))
-})
-
-test_that("'lfp_tidy' throws correct error when variable missing", {
-  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
-  data <- utils::read.csv(fn)
-  data <- data[-match("REF_AREA", names(data))]
-  expect_error(lfp_tidy(data),
-               "`data` does not have a column called \"REF_AREA\"")
-})
-
-test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
-  fn <- file.path("data_for_tests", "oecd_lfp_test.csv.gz")
-  data <- utils::read.csv(fn)
-  data$SEX[4] <- "wrong"
-  expect_error(lfp_tidy(data),
-               "Invalid value for `sex`: \"wrong\"")
-})
-
-
 ## 'lfp_total' ----------------------------------------------------------------
 
 test_that("'lfp_total' works with valid inputs", {
@@ -124,7 +118,7 @@ test_that("'lfp_total' works with valid inputs", {
                                                  open = TRUE),
                               "60+"),
                       time = 2001:2005)
-  data$measure <- runif(n = nrow(data))
+  data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
   ans_obtained <- lfp_total(data, labels_age = labels_age, n_comp = 5)
   expect_setequal(names(ans_obtained),

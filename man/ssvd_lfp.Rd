@@ -38,12 +38,16 @@ lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 
 \strong{Step 2: Call function 'svd_lfp'}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{LFP <- svd_lfp(data)
+\if{html}{\out{<div class="sourceCode">}}\preformatted{LFP <- ssvd_lfp(lfp_df)
 }\if{html}{\out{</div>}}
 }
 
+\examples{
+LFP_small <- ssvd_lfp(oecd_lfp)
+}
 \seealso{
 \itemize{
+\item \code{\link[=lfp_tidy]{lfp_tidy()}} Tidy raw data, but do not process into SVD object.
 \item \code{\link[bage:SVD]{bage::SVD()}}, \code{\link[bage:SVDS]{bage::SVDS()}}, \code{\link[bage:ESVD]{bage::ESVD()}}, \code{\link[bage:ESVDS]{bage::ESVDS()}}
 to use an object of class
 \code{\link[bage:ssvd]{"bage_ssvd"}} in a prior.

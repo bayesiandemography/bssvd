@@ -13,7 +13,7 @@
 #'
 #' @format
 #' A tibble with 12069 rows and the following
-#' columns `TIME_PERIOD`, `REF_AREA`,
+#' columns: `TIME_PERIOD`, `REF_AREA`,
 #' `MEASURE`,`UNIT_MEASURE`, `SEX`, `AGE`,
 #' `LABOUR FORCE STATUS`, `obsValue`, `DECIMALS`,
 #' `OBS_STATUS`.
@@ -26,3 +26,27 @@
 #' Only a subset of the full dataset is included
 #' in `oecd_lpr`.
 "oecd_lfp"
+
+
+#' Human Fertility Database data on
+#' Age-Specific Fertility Rates
+#'
+#' Fertility rates by single year of age,
+#' by county, by calendar year. 
+#' from the Human Fertility Database.
+#'
+#' `asfr` is for testing, rather than data analysis.
+#' It only contains data for the period 1980-2000,
+#' and is not kept up-to-date. Data for analysis
+#' should be obtained from the HFD itself.
+#'
+#' @format
+#' A tibble with 33572 rows and the following
+#' columns: `Code`, `Year`, `Age`,`ASFR`.
+#'
+#' @source Downloaded from the "Age-specific fertility rate"
+#' row of the "By Statistic" table on the
+#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles)
+#' page of the Human Fertility Database.
+#' Accessed 12 April 2024.
+"asfr"
