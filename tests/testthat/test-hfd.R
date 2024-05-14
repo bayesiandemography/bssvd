@@ -15,6 +15,7 @@ test_that("'hfd_tidy' works with valid inputs", {
                   c("country", "age", "time", "value"))
   expect_true(tibble::is_tibble(ans))
   expect_identical(min(ans$age), 12L)
+  expect_identical(max(ans$age), 55L)
 })
 
 test_that("'hfd_tidy' throws correct error when variable missing", {
@@ -89,16 +90,63 @@ test_that("'hfd_joint' works with valid inputs", {
 
 ## 'hfd_make_labels_age' ------------------------------------------------------
 
-test_that("'hfd_make_labels_age' works", {
-  data <- data.frame(age = c("15-19", "20-24", "20+", "25+", "25-29", "30+"))
+test_that("'hfd_make_labels_age' works - age_min_max higher than data", {
+  data <- data.frame(age = 12:19)
   ans_obtained <- hfd_make_labels_age(data = data,
-                                      age_max = 25)
-  ans_expected <- list("15-19",
-                       c("15-19", "20-24"),
-                       c("15-19", "20+"),
-                       c("15-19", "20-24", "25+"))
+                                      age_min_max = 15,
+                                      age_max_min = 20)
+  ans_expected <- list(as.character(12:19),
+                       as.character(13:19),
+                       as.character(14:19),
+                       as.character(15:19),
+                       c("10-14", "15-19"),
+                       c("15-19"))
   expect_identical(ans_obtained, ans_expected)
 })
+
+test_that("'hfd_make_labels_age' works - age_max_min lower than data", {
+  data <- data.frame(age = 12:20)
+  ans_obtained <- hfd_make_labels_age(data = data,
+                                      age_min_max = 12,
+                                      age_max_min = 20)
+  ans_expected <- list(as.character(12:19),
+                       as.character(12:20),
+                       c("10-14", "15-19"),
+                       c("10-14", "15-19", "20-24"))
+  expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'hfd_make_labels_age' works - age_min_max higher than data, age_max_min lower than data", {
+  data <- data.frame(age = 12:20)
+  ans_obtained <- hfd_make_labels_age(data = data,
+                                      age_min_max = 13,
+                                      age_max_min = 20)
+  ans_expected <- list(as.character(12:19),
+                       as.character(12:20),
+                       as.character(13:19),
+                       as.character(13:20),
+                       c("10-14", "15-19"),
+                       c("10-14", "15-19", "20-24"))
+  expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'hfd_make_labels_age' throws appropriate error when age_min_max below data", {
+  data <- data.frame(age = 12:20)
+  expect_error(hfd_make_labels_age(data = data,
+                                   age_min_max = 10,
+                                   age_max_min = 20),
+               "`age_min_max` is below the youngest age group in the data.")
+})
+
+test_that("'hfd_make_labels_age' throws appropriate error when age_max_min above data", {
+  data <- data.frame(age = 12:20)
+  expect_error(hfd_make_labels_age(data = data,
+                                   age_min_max = 15,
+                                   age_max_min = 25),
+               "`age_max_min` is above the upper limit of the oldest age group in the data.")
+})
+
+
 
 
 ## 'hfd_total' ----------------------------------------------------------------
