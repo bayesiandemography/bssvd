@@ -58,8 +58,7 @@
 #' - [hfd_tidy()] Tidy raw data, but do not process into SVD object.
 #' - [ssvd_lfp()] Created scaled SVD object from OECD labour force
 #'   participation rate data.
-#' - [bage::SVD()], [bage::SVDS()], [bage::ESVD()], [bage::ESVDS()]
-#'   to use an object of class
+#' - [bage::SVD()], [bage::SVDS()] to use an object of class
 #'   [`"bage_ssvd"`][bage::ssvd()] in a prior.
 #'
 #' @examples
@@ -91,7 +90,7 @@ ssvd_hfd <- function(data,
                                     age_max_min = age_max_min)
   cli::cli_progress_message("Carrying out SVD for 'total'...")
   hfd_total(data = data, labels_age = labels_age, n_comp = n_comp)
-  bage::ssvd(data)
+  ssvd(data)
 }
 
 
@@ -147,6 +146,8 @@ hfd_tidy <- function(data) {
 #' @noRd
 hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
   age_data <- data$age
+  if (!is.integer(age_data))
+    cli::cli_abort("Internal error: Age variable is not integer.")
   age_min_data <- min(age_data)
   age_min_data_five <- floor(age_min_data / 5L) * 5L
   age_max_data <- max(age_data) + 1L ## +1 because 'age_max' is upper limit
@@ -182,24 +183,31 @@ hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
 }
 
 
+#' Get Data For One Set of Age Labels
+#'
+#' Aggregate when age labels are for five years.
+#'
+#' @param data A data frame
+#' @param labels_age A character vector
+#'
+#' @returns A data frame
+#'
 #' @noRd
 hfd_get_data_one <- function(data, labels_age) {
   age_lower_labels <- poputils::age_lower(labels_age)
   age_upper_labels <- poputils::age_upper(labels_age)
   is_open_labels <- any(is.infinite(age_upper_labels))
-  age_type <- age_group_type(labels_age)
+  if (is_open_labels)
+    cli::cli_abort("Internal error: Age labels include open age group.")
+  age_type <- poputils::age_group_type(labels_age)
   min_labels_age <- min(age_lower_labels)
   max_labels_age <- max(age_lower_labels)
-  age_lower_data <- age_lower(data$age)
+  age_lower_data <- poputils::age_lower(data$age)
   data$age[age_lower_data < min_labels_age] <- min_labels_age
-  if (is_open_labels)
-    data$age <- poputils::set_age_open(data$age, lower = max_labels_age)
-  else
-    data$age[age_lower_data > max_labels_age] <- max_labels_age
-  if (age_type == "five") {
+  data$age[age_lower_data > max_labels_age] <- max_labels_age
+  if (age_type == "five")
     data$age <- poputils::combine_age(data$age, to = "five")
-    data <- stats::aggregate(data["value"], data[c("country", "time", "age")], sum)
-  }
+  ans <- stats::aggregate(data["value"], data[c("country", "time", "age")], sum)
   ans$age <- factor(ans$age, levels = labels_age)
   ord <- order(ans$age)
   ans <- ans[ord, ]
@@ -211,7 +219,7 @@ hfd_get_data_one <- function(data, labels_age) {
 
 #' @noRd
 hfd_total <- function(data, labels_age, n_comp) {
-  data_split <- .mapply(lfp_get_data_one,
+  data_split <- .mapply(hfd_get_data_one,
                         dots = list(labels_age = labels_age),
                         MoreArgs = list(data = data))
   x_split <- .mapply(poputils::to_matrix,
@@ -221,7 +229,7 @@ hfd_total <- function(data, labels_age, n_comp) {
                                      measure = "value"))
   x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
   ssvd_split <- lapply(x_split,
-                       bage::ssvd_comp,
+                       make_matrix_and_offset,
                        transform = "log",
                        n_comp = n_comp)
   matrix <- lapply(ssvd_split, function(x) x$matrix)

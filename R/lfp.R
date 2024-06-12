@@ -1,18 +1,9 @@
 
 ## HAS_TESTS
-#' Create a Scaled SVD Object from OECD Labour Force Participation Data
+#' Prepare OECD Data on Labour Force Participation Rates
 #'
-#' Create an object of class [`"bage_ssvd"`][bage::ssvd()]
-#' from labour force participation data downloaded from
+#' Process labour force participation data downloaded from
 #' the [OECD Data Explorer](https://data-explorer.oecd.org). 
-#'
-#' @param data A data frame containing OECD data.
-#' @param age_max The upper limit of the
-#' oldest closed age group. Default is `75`.
-#' @param n_comp Number of SVD components
-#' to include in result. Default is `5`.
-#'
-#' @returns An object of class [`"bage_ssvd"`][ssvd()]
 #'
 #' @section Usage:
 #' **Step 1: Download data**
@@ -27,23 +18,32 @@
 #' data <- as.data.frame(lfp_sdmx)     ## can also be slow
 #' ```
 #'
-#' **Step 2: Call function 'ssvd_lfp'**
+#' **Step 2: Call function 'data_ssvd_lfp()'**
 #'
 #' ```
-#' LFP <- ssvd_lfp(data)
+#' lfp_data <- data_ssvd_lfp(data)
 #' ```
+#'
+#' @param data A data frame containing OECD data.
+#' @param age_max The upper limit of the
+#' oldest closed age group. Default is `75`.
+#' @param n_comp Number of SVD components
+#' to include in result. Default is `5`.
+#'
+#' @returns A tibble with the format required by
+#' function `bage::ssvd()`.
+#'
 #' @seealso
-#' - [lfp_tidy()] Tidy raw data, but do not process into SVD object.
-#' - [ssvd_hfd()] Created scaled SVD object from Human Fertility
-#'   Database age-specific fertility rates
-#' - [bage::SVD()], [bage::SVDS()], [bage::ESVD()], [bage::ESVDS()]
-#'   to use an object of class
-#'   [`"bage_ssvd"`][bage::ssvd()] in a prior.
+#' - [data_ssvd_hfd()] Prepare data on age-specific fertility rates
+#'   from Human Fertility Database.
+#' - [data_ssvd_hmd()] Prepare data on age-specific mortality rates
+#'   from Human Mortality Database.
+#' - [bage::ssvd()] Create Scaled SVD object
 #'
 #' @examples
-#' LFP_small <- ssvd_lfp(oecd_lfp)
+#' lfp_data_small <- data_ssvd_lfp(oecd_lfp)
 #' @export
-ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
+data_ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
   check_n(n = age_max,
           nm_n = "age_max",
           min = 20L,
@@ -54,6 +54,8 @@ ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
           min = 5L,
           max = 10L,
           divisible_by = 1L)
+  age_max <- as.integer(age_max)
+  n_comp <- as.integer(n_comp)
   cli::cli_progress_message("Tidying data...")
   data <- lfp_tidy(data)
   labels_age <- lfp_make_labels_age(data = data,
@@ -67,75 +69,7 @@ ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
   cli::cli_progress_message("Combining results...")
   data <- vctrs::vec_rbind(total, indep, joint)
   data <- tibble::as_tibble(data)
-  bage::ssvd(data)
-}
-
-
-## HAS_TESTS
-#' Tidy OECD Labor Force Participation Data
-#'
-#' Tidy data frame containing data downloaded from
-#' the Labour Force Indicators table of the
-#' [OECD Data Explorer](https://data-explorer.oecd.org). 
-#'
-#' @param data A data frame
-#'
-#' @returns A tibble.
-#'
-#' @seealso
-#' - [ssvd_lfp()] Tidy data, and convert it into
-#'   and an SVD object.
-#'
-#' @examples
-#' data_tidy <- lfp_tidy(oecd_lfp)
-#' @export
-lfp_tidy <- function(data) {
-  nms_required <- c("TIME_PERIOD", "REF_AREA", "SEX", "AGE", "MEASURE", "obsValue")
-  nms_obtained <- names(data)
-  for (nm in nms_required)
-    if (!(nm %in% nms_obtained))
-      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
-  ans <- data[nms_required]
-  ans <- ans[ans$MEASURE == "LF_RATE", ]
-  ans <- ans[-match("MEASURE", names(ans))]
-  names(ans) <- c("time", "country", "sex", "age", "value")
-  ans <- ans[!(ans$country %in% c("G7",
-                                  "EU27",
-                                  "E",
-                                  "EU22OECD",
-                                  "EU19OECD",
-                                  "OECD",
-                                  "OECD_REP")), ]
-  ans <- ans[!(ans$age %in% c("_U", "_T")), ]
-  p_open <- "^Y_GE([0-9]+)$"
-  p_closed <- "^Y([0-9]+)T([0-9]+)$"
-  ans$age <- sub(p_open, "\\1+", ans$age)
-  ans$age <- sub(p_closed, "\\1-\\2", ans$age)
-  ans <- ans[!(ans$age %in% c("15-24",
-                              "25-34",
-                              "30-39",
-                              "35-44",
-                              "40-49",
-                              "45-54",
-                              "50-59",
-                              "55-64",
-                              "65-74",
-                              "25-54",
-                              "25-64",
-                              "15-64",
-                              "20-64",
-                              "25-39")), ]
-  ans$sex <- sub("^_T$", "Total", ans$sex)
-  ans$sex <- sub("^F$", "Female", ans$sex)
-  ans$sex <- sub("^M$", "Male", ans$sex)
-  is_valid_sex <- ans$sex %in% c("Total", "Female", "Male")
-  i_invalid_sex <- match(FALSE, is_valid_sex, nomatch = 0L)
-  if (i_invalid_sex > 0L)
-    cli::cli_abort(c("Invalid value for {.var sex}: {.val {ans$sex[[i_invalid_sex]]}}."))
-  ans$value <- ans$value / 100
-  ans$value <- trim_01(ans$value)
-  ans <- tibble::tibble(ans)
-  ans
+  data
 }
 
 
@@ -194,7 +128,7 @@ lfp_indep <- function(data, labels_age, n_comp) {
   ssvd_split <- lapply(x_split,
                        function(x_one_age_max)
                          lapply(x_one_age_max,
-                                bage::ssvd_comp,
+                                make_matrix_and_offset,
                                 transform = "logit",
                                 n_comp = n_comp))
   n_age <- lengths(labels_age)
@@ -244,7 +178,7 @@ lfp_joint <- function(data, labels_age, n_comp) {
                                      measure = "value"))
   x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
   ssvd_split <- lapply(x_split,
-                       bage::ssvd_comp,
+                       make_matrix_and_offset,
                        transform = "logit",
                        n_comp = n_comp)
   n_age <- lengths(labels_age)
@@ -293,6 +227,74 @@ lfp_make_labels_age <- function(data, age_max) {
 
 
 ## HAS_TESTS
+#' Tidy OECD Labor Force Participation Data
+#'
+#' Initial tidying of data downloaded from
+#' the Labour Force Indicators table of the
+#' [OECD Data Explorer](https://data-explorer.oecd.org). 
+#'
+#' @param data A data frame
+#'
+#' @returns A tibble
+#'
+#' @seealso
+#' - [data_ssvd_lfp()] Full processing of labour force
+#'   participation data
+#'
+#' @examples
+#' data_tidy <- lfp_tidy(oecd_lfp)
+#' @noRd
+lfp_tidy <- function(data) {
+  nms_required <- c("TIME_PERIOD", "REF_AREA", "SEX", "AGE", "MEASURE", "obsValue")
+  nms_obtained <- names(data)
+  for (nm in nms_required)
+    if (!(nm %in% nms_obtained))
+      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
+  ans <- data[nms_required]
+  ans <- ans[ans$MEASURE == "LF_RATE", ]
+  ans <- ans[-match("MEASURE", names(ans))]
+  names(ans) <- c("time", "country", "sex", "age", "value")
+  ans <- ans[!(ans$country %in% c("G7",
+                                  "EU27",
+                                  "E",
+                                  "EU22OECD",
+                                  "EU19OECD",
+                                  "OECD",
+                                  "OECD_REP")), ]
+  ans <- ans[!(ans$age %in% c("_U", "_T")), ]
+  p_open <- "^Y_GE([0-9]+)$"
+  p_closed <- "^Y([0-9]+)T([0-9]+)$"
+  ans$age <- sub(p_open, "\\1+", ans$age)
+  ans$age <- sub(p_closed, "\\1-\\2", ans$age)
+  ans <- ans[!(ans$age %in% c("15-24",
+                              "25-34",
+                              "30-39",
+                              "35-44",
+                              "40-49",
+                              "45-54",
+                              "50-59",
+                              "55-64",
+                              "65-74",
+                              "25-54",
+                              "25-64",
+                              "15-64",
+                              "20-64",
+                              "25-39")), ]
+  ans$sex <- sub("^_T$", "Total", ans$sex)
+  ans$sex <- sub("^F$", "Female", ans$sex)
+  ans$sex <- sub("^M$", "Male", ans$sex)
+  is_valid_sex <- ans$sex %in% c("Total", "Female", "Male")
+  i_invalid_sex <- match(FALSE, is_valid_sex, nomatch = 0L)
+  if (i_invalid_sex > 0L)
+    cli::cli_abort(c("Invalid value for {.var sex}: {.val {ans$sex[[i_invalid_sex]]}}."))
+  ans$value <- ans$value / 100
+  ans$value <- trim_01(ans$value)
+  ans <- tibble::tibble(ans)
+  ans
+}
+
+
+## HAS_TESTS
 #' Prepare Inputs for "total" Type, ie Female and Male Combined
 #'
 #' @param data A data frame
@@ -314,7 +316,7 @@ lfp_total <- function(data, labels_age, n_comp) {
                                      measure = "value"))
   x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
   ssvd_split <- lapply(x_split,
-                       bage::ssvd_comp,
+                       make_matrix_and_offset,
                        transform = "logit",
                        n_comp = n_comp)
   matrix <- lapply(ssvd_split, function(x) x$matrix)

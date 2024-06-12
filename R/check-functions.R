@@ -1,5 +1,22 @@
 
 ## HAS_TESTS
+#' Check that an Object is a Matrix
+#'
+#' @param x An object
+#' @param nm_x Name to be used in error messages
+#'
+#' @returns TRUE, invisibly
+#'
+#' @noRd
+check_is_matrix <- function(x, nm_x) {
+  if (!is.matrix(x))
+    cli::cli_abort(c("{.arg {nm_x}} is not a matrix.",
+                     i = "{.arg {nm_x}} has class {.cls {class(x)}}."))
+  invisible(TRUE)
+}
+
+
+## HAS_TESTS
 #' Check 'n' argument
 #'
 #' @param n A whole number
@@ -36,3 +53,25 @@ check_n <- function(n, nm_n, min, max, divisible_by) {
   invisible(TRUE)
 }
 
+
+## HAS_TESTS
+#' Check that Vector is Numeric, Non-NA, Finite, Non-Zero Length
+#'
+#' @param x A vector
+#' @param nm_x Name to be used in error messages
+#'
+#' @returns TRUE, invisibly
+#' 
+#' @noRd
+check_numeric <- function(x, nm_x) {
+  if (!is.numeric(x))
+    cli::cli_abort(c("{.arg {nm_x}} is non-numeric.",
+                     i = "{.arg {nm_x}} has class {.cls {class(x)}}."))
+  if (length(x) == 0L)
+    cli::cli_abort("{.arg {nm_x}} has length 0.")
+  if (anyNA(x))
+    cli::cli_abort("{.arg {nm_x}} has {.val {NA}}.")
+  if (any(is.infinite(x)))
+    cli::cli_abort("{.arg {nm_x}} has non-finite value.")
+  invisible(TRUE)
+}

@@ -29,9 +29,11 @@ test_that("'hfd_tidy' throws correct error when variable missing", {
 ## 'hfd_get_data_one' ---------------------------------------------------------
 
 test_that("'hfd_get_data_one' works", {
-  data <- data.frame(age = c("25-29", "20-24", "30-34", "30+"),
-                     val = 1:4)
-  labels_age <- c("20-24", "25-29", "30+")
+  data <- data.frame(age = 12:51,
+                     country = "a",
+                     time = 2000,
+                     value = 1:40)
+  labels_age <- c("20-24", "25-29", "30-34", "35-39")
   ans_obtained <- hfd_get_data_one(data = data,
                                    labels_age = labels_age)
   ans_expected <- data.frame(age = factor(c("20-24", "25-29", "30+")),
@@ -146,7 +148,13 @@ test_that("'hfd_make_labels_age' throws appropriate error when age_max_min above
                "`age_max_min` is above the upper limit of the oldest age group in the data.")
 })
 
-
+test_that("'hfd_make_labels_age' works - thows appropriate error when is factor", {
+  data <- data.frame(age = factor(12:19))
+  expect_error(hfd_make_labels_age(data = data,
+                                      age_min_max = 15,
+                                   age_max_min = 20),
+               "Internal error: Age variable is not integer.")
+})
 
 
 ## 'hfd_total' ----------------------------------------------------------------
@@ -154,14 +162,12 @@ test_that("'hfd_make_labels_age' throws appropriate error when age_max_min above
 test_that("'hfd_total' works with valid inputs", {
   data <- expand.grid(country = 1:2,
                       sex = c("Female", "Male", "Total"),
-                      age = c(poputils::age_labels(type = "five",
-                                                 min = 15,
-                                                 max = 70,
-                                                 open = TRUE),
-                              "60+"),
+                      age = 15:54,
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
-  labels_age <- hfd_make_labels_age(data = data, age_max = 65)
+  labels_age <- hfd_make_labels_age(data = data,
+                                    age_min_max = 15,
+                                    age_max_min = 45)
   ans_obtained <- hfd_total(data, labels_age = labels_age, n_comp = 5)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))

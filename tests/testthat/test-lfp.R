@@ -1,33 +1,10 @@
 
-## 'ssvd_lfp' -----------------------------------------------------------------
+## 'data_ssvd_lfp' -----------------------------------------------------------------
 
 test_that("'ssvd_lfp' works with valid inputs", {
-  suppressMessages(ans <- ssvd_lfp(oecd_lfp, age_max = 65))
+  suppressMessages(data <- data_ssvd_lfp(oecd_lfp, age_max = 65))
+  ans <- bage::ssvd(data)
   expect_s3_class(ans, "bage_ssvd")
-})
-
-
-## 'lfp_tidy' --------------------------------------------------------
-
-test_that("'lfp_tidy' works with valid inputs", {
-  ans <- lfp_tidy(oecd_lfp)
-  expect_setequal(names(ans),
-                  c("country", "sex", "age", "time", "value"))
-  expect_true(tibble::is_tibble(ans))
-})
-
-test_that("'lfp_tidy' throws correct error when variable missing", {
-  data <- oecd_lfp
-  data <- data[-match("REF_AREA", names(data))]
-  expect_error(lfp_tidy(data),
-               "`data` does not have a column called \"REF_AREA\"")
-})
-
-test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
-  data <- oecd_lfp
-  data$SEX[3] <- "wrong"
-  expect_error(lfp_tidy(data),
-               "Invalid value for `sex`: \"wrong\"")
 })
 
 
@@ -104,6 +81,30 @@ test_that("'lfp_make_labels_age' works", {
                        c("15-19", "20+"),
                        c("15-19", "20-24", "25+"))
   expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'lfp_tidy' --------------------------------------------------------
+
+test_that("'lfp_tidy' works with valid inputs", {
+  ans <- lfp_tidy(oecd_lfp)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+})
+
+test_that("'lfp_tidy' throws correct error when variable missing", {
+  data <- oecd_lfp
+  data <- data[-match("REF_AREA", names(data))]
+  expect_error(lfp_tidy(data),
+               "`data` does not have a column called \"REF_AREA\"")
+})
+
+test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
+  data <- oecd_lfp
+  data$SEX[3] <- "wrong"
+  expect_error(lfp_tidy(data),
+               "Invalid value for `sex`: \"wrong\"")
 })
 
 
