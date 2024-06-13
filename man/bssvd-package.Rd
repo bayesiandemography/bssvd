@@ -8,6 +8,13 @@
 \description{
 Based on data from international demographic databases, build objects of class "bage_ssvd", to be used with package 'bage'. 'bssvd' is a developer-focused package, and would not normally be used directly for data analysis.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://bayesiandemography.github.io/bssvd/}
+}
+
+}
 \author{
 \strong{Maintainer}: John Bryant \email{john@bayesiandemography.com}
 
