@@ -28,7 +28,7 @@
 #' from the Human Mortality Database.
 #' A path name that is handled by [utils::unzip()].
 #' @param n_comp Number of SVD components
-#' to include in result. Default is `10`.
+#' to include in result. Default is `5`.
 #'
 #' @returns A tibble with the format required by
 #' function `bage::ssvd()`.
@@ -41,10 +41,10 @@
 #' - [bage::ssvd()] Create Scaled SVD object
 #'
 #' @export
-data_ssvd_hmd <- function(zipfile, n_comp = 10) {
+data_ssvd_hmd <- function(zipfile, n_comp = 5) {
   check_n(n = n_comp,
           nm_n = "n_comp",
-          min = 5L,
+          min = 2L,
           max = 10L,
           divisible_by = 1L)
   n_comp <- as.integer(n_comp)
