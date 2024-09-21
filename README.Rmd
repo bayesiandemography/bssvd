@@ -27,10 +27,7 @@ Use data from international demographic databases to create objects that capture
 
 ## Installation
 
-You can install the development version of bssvd from [GitHub](https://github.com/) with:
-
 ``` r
-# install.packages("devtools")
 devtools::install_github("bayesiandemography/bssvd")
 ```
 

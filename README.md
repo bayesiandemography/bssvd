@@ -21,11 +21,7 @@ to be used directly for data analysis.
 
 ## Installation
 
-You can install the development version of bssvd from
-[GitHub](https://github.com/) with:
-
 ``` r
-# install.packages("devtools")
 devtools::install_github("bayesiandemography/bssvd")
 ```
 
