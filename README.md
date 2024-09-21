@@ -10,6 +10,8 @@ experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](h
 [![R-CMD-check](https://github.com/bayesiandemography/bssvd/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/bayesiandemography/bssvd/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/bayesiandemography/bssvd/branch/main/graph/badge.svg)](https://app.codecov.io/gh/bayesiandemography/bssvd?branch=main)
+[![Codecov test
+coverage](https://codecov.io/gh/bayesiandemography/bssvd/graph/badge.svg)](https://app.codecov.io/gh/bayesiandemography/bssvd)
 <!-- badges: end -->
 
 Use data from international demographic databases to create objects that
