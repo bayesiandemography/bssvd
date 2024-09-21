@@ -1,6 +1,6 @@
 
 ## HAS_TESTS
-#' Prepare Data frome Human Mortality Database
+#' Prepare Data from Human Mortality Database
 #'
 #' Process data on age-specific mortality rates
 #' from a zipped file downloaded from the
@@ -16,12 +16,12 @@
 #'
 #' https://www.mortality.org/File/Download/hmd.v6/zip/all_hmd/hmd_statistics_20240226.zip
 #'
-#' **Step 2: Call function 'svd_hmd'**
+#' **Step 2: Call function 'data_ssvd_hmd'**
 #'
 #' Put the file into the working directory, and supply the name of the file
 #' to function `data_ssvd_hmd()`, eg
 #' ```
-#' data_hmd <- data_ssvd_hmd("hmd_statistcs_20240226")
+#' hmd_data <- data_ssvd_hmd("hmd_statistcs_20240226")
 #' ```
 #'
 #' @param zipfile The name of a zipped file downloaded
@@ -31,15 +31,19 @@
 #' to include in result. Default is `5`.
 #'
 #' @returns A tibble with the format required by
-#' function `bage::ssvd()`.
+#' `bage::ssvd()`.
 #'
 #' @seealso
-#' - [data_ssvd_hfd()] Prepare data on age-specific fertility rates
-#'   from Human Fertility Database
-#' - [data_ssvd_lfs()] Prepare data on labour force participation
-#'   rates from the OCED
-#' - [bage::ssvd()] Create Scaled SVD object
-#'
+#' - [data_ssvd_hfd()] Prepare data on fertility
+#'   from the Human Fertility Database
+#' - [data_ssvd_lfp()] Prepare data on labour force participation
+#'   from the OCED
+#' 
+#' @examples
+#' zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+#'                        package = "bssvd")
+#' data <- data_ssvd_hmd(zipfile)
+#' data
 #' @export
 data_ssvd_hmd <- function(zipfile, n_comp = 5) {
   check_n(n = n_comp,

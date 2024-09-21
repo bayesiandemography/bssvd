@@ -1,10 +1,10 @@
 
-#' OECD data on Labour Force Participation
+#' OECD Data on Labour Force Participation
 #'
 #' Data on labour force participation rates
 #' by age and sex, for
-#' multiple countries, starting in 1960,
-#' from the OECD Data Explorer database.
+#' multiple countries, starting for 2010--2012
+#' extracted from the OECD Data Explorer database.
 #'
 #' The labour force participation rate is the
 #' number of people in the labour force (ie the
@@ -24,18 +24,18 @@
 #' [OECD Data Explorer](https://data-explorer.oecd.org).
 #' Accessed 21 April 2024.
 #' Only a subset of the full dataset is included
-#' in `oecd_lpr`.
-"oecd_lfp"
+#' in `oecd_lfp_subset`.
+"oecd_lfp_subset"
 
 
-#' Human Fertility Database data on
+#' Human Fertility Database Data on
 #' Age-Specific Fertility Rates
 #'
 #' Fertility rates by single year of age,
 #' by county, by calendar year. 
 #' from the Human Fertility Database.
 #'
-#' `asfr` is for testing, rather than data analysis.
+#' `asfr_subset` is for testing, rather than data analysis.
 #' It only contains data for the period 1980-2000,
 #' and is not kept up-to-date. Data for analysis
 #' should be obtained from the HFD itself.
@@ -49,4 +49,4 @@
 #' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles)
 #' page of the Human Fertility Database.
 #' Accessed 12 April 2024.
-"asfr"
+"asfr_subset"

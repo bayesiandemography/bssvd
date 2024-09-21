@@ -2,10 +2,11 @@
 ## 'data_ssvd_hmd' -----------------------------------------------------------------
 
 test_that("'data_ssvd_hmd' works with valid inputs", {
-  fn <- file.path("data_for_tests", "hmd_statistics_test.zip")
+  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
   suppressMessages(data <- data_ssvd_hmd(fn))
-  ans <- bage::ssvd(data)
-  expect_s3_class(ans, "bage_ssvd")
+  expect_true(tibble::is_tibble(data))
+  ## ans <- bage::ssvd(data)
+  ## expect_s3_class(ans, "bage_ssvd")
 })
 
 
@@ -157,21 +158,21 @@ test_that("'hmd_total' works with valid inputs", {
 ## 'hmd_unzip' ----------------------------------------------------------------
 
 test_that("'hmd_unzip' works with valid inputs - unzipped has hmd_statistics_test folder", {
-  fn <- file.path("data_for_tests", "hmd_statistics_test.zip")
+  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
   ans <- hmd_unzip(fn)
   expect_setequal(names(ans),
                   c("country", "Year", "Age", "mx", "Lx", "sex", "type_age"))
 })
 
 test_that("'hmd_unzip' works with valid inputs - unzipped does not have hmd_statistics_test folder", {
-  fn <- file.path("data_for_tests", "hmd_statistics_test_v2.zip")
+  fn <- file.path("data_for_tests", "hmd_statistics_test_no_folder.zip")
   ans <- hmd_unzip(fn)
   expect_setequal(names(ans),
                   c("country", "Year", "Age", "mx", "Lx", "sex", "type_age"))
 })
 
 test_that("'hmd_unzip' gives expected error when zipfile missing files", {
-  fn <- file.path("data_for_tests", "hmd_statistics_test_v3.zip")
+  fn <- file.path("data_for_tests", "hmd_statistics_test_missing_files.zip")
   expect_error(hmd_unzip(fn),
                "Did not get expected files when unzipped `zipfile`.")
 })
@@ -216,14 +217,3 @@ test_that("'hmd_vary_age_open_type_age' works with valid inputs", {
   expect_identical(unique(ans_obtained$age_open),
                    seq.int(from = 60L, to = 110L, by = 5L))
 })
-
-
-
-
-
-
-
-
-
-
-

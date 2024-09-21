@@ -15,7 +15,7 @@
 #'              "all?dimensionAtObservation=AllDimensions",
 #'              sep = "/")
 #' lfp_sdmx <- rsdmx::readSDMX(url)    ## can be slow
-#' data <- as.data.frame(lfp_sdmx)     ## can also be slow
+#' lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 #' ```
 #'
 #' **Step 2: Call function 'data_ssvd_lfp()'**
@@ -34,16 +34,18 @@
 #' function `bage::ssvd()`.
 #'
 #' @seealso
-#' - [data_ssvd_hfd()] Prepare data on age-specific fertility rates
-#'   from Human Fertility Database.
-#' - [data_ssvd_hmd()] Prepare data on age-specific mortality rates
-#'   from Human Mortality Database.
-#' - [bage::ssvd()] Create Scaled SVD object
+#' - [data_ssvd_hfd()] Prepare data on fertility
+#'   from the Human Fertility Database
+#' - [data_ssvd_hmd()] Prepare data on mortality
+#'   from the Human Mortality Database
 #'
 #' @examples
-#' lfp_data_small <- data_ssvd_lfp(oecd_lfp)
+#' data <- data_ssvd_lfp(oecd_lfp_subset)
+#' data
 #' @export
-data_ssvd_lfp <- function(data, age_max = 75, n_comp = 5) {
+data_ssvd_lfp <- function(data,
+                          age_max = 75,
+                          n_comp = 5) {
   check_n(n = age_max,
           nm_n = "age_max",
           min = 20L,
@@ -237,12 +239,6 @@ lfp_make_labels_age <- function(data, age_max) {
 #'
 #' @returns A tibble
 #'
-#' @seealso
-#' - [data_ssvd_lfp()] Full processing of labour force
-#'   participation data
-#'
-#' @examples
-#' data_tidy <- lfp_tidy(oecd_lfp)
 #' @noRd
 lfp_tidy <- function(data) {
   nms_required <- c("TIME_PERIOD", "REF_AREA", "SEX", "AGE", "MEASURE", "obsValue")

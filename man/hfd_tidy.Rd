@@ -18,12 +18,13 @@ the ASFR row of the "By statistic" table of
 \href{https://www.humanfertility.org/Data/ZippedDataFiles}{ZippedDataFiles}.
 }
 \examples{
-hfd_tidy(asfr)
+hfd_tidy(asfr_subset)
 }
 \seealso{
 \itemize{
-\item \code{\link[=ssvd_hfd]{ssvd_hfd()}} Tidy data, and convert it into
-and an SVD object.
-\item \code{\link[=lfp_tidy]{lfp_tidy()}} Tidy OECD data on labour force participation.
+\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on mortality
+from Human Mortality Database
+\item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Prepare data on labour force participation
+from the OCED
 }
 }

@@ -2,9 +2,9 @@
 % Please edit documentation in R/hmd.R
 \name{data_ssvd_hmd}
 \alias{data_ssvd_hmd}
-\title{Prepare Data frome Human Mortality Database}
+\title{Prepare Data from Human Mortality Database}
 \usage{
-data_ssvd_hmd(zipfile, n_comp = 10)
+data_ssvd_hmd(zipfile, n_comp = 5)
 }
 \arguments{
 \item{zipfile}{The name of a zipped file downloaded
@@ -12,11 +12,11 @@ from the Human Mortality Database.
 A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 
 \item{n_comp}{Number of SVD components
-to include in result. Default is \code{10}.}
+to include in result. Default is \code{5}.}
 }
 \value{
 A tibble with the format required by
-function \code{bage::ssvd()}.
+\code{bage::ssvd()}.
 }
 \description{
 Process data on age-specific mortality rates
@@ -34,21 +34,26 @@ download a file from the "Statistics" column, eg file
 
 https://www.mortality.org/File/Download/hmd.v6/zip/all_hmd/hmd_statistics_20240226.zip
 
-\strong{Step 2: Call function 'svd_hmd'}
+\strong{Step 2: Call function 'data_ssvd_hmd'}
 
 Put the file into the working directory, and supply the name of the file
 to function \code{data_ssvd_hmd()}, eg
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{data_hmd <- data_ssvd_hmd("hmd_statistcs_20240226")
+\if{html}{\out{<div class="sourceCode">}}\preformatted{hmd_data <- data_ssvd_hmd("hmd_statistcs_20240226")
 }\if{html}{\out{</div>}}
 }
 
+\examples{
+zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+                       package = "bssvd")
+data <- data_ssvd_hmd(zipfile)
+data
+}
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on age-specific fertility rates
-from Human Fertility Database
-\item \code{\link[=data_ssvd_lfs]{data_ssvd_lfs()}} Prepare data on labour force participation
-rates from the OCED
-\item \code{\link[bage:ssvd]{bage::ssvd()}} Create Scaled SVD object
+\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on fertility
+from the Human Fertility Database
+\item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Prepare data on labour force participation
+from the OCED
 }
 }

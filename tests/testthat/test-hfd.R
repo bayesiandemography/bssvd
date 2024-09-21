@@ -1,28 +1,9 @@
 
-## 'ssvd_hfd' -----------------------------------------------------------------
+## 'data_ssvd_hfd' ------------------------------------------------------------
 
-test_that("'ssvd_hfd' works with valid inputs", {
-  suppressMessages(ans <- ssvd_hfd(oecd_hfd, age_max = 65))
-  expect_s3_class(ans, "bage_ssvd")
-})
-
-
-## 'hfd_tidy' --------------------------------------------------------
-
-test_that("'hfd_tidy' works with valid inputs", {
-  ans <- hfd_tidy(asfr)
-  expect_setequal(names(ans),
-                  c("country", "age", "time", "value"))
+test_that("'data_ssvd_hfd' works with valid inputs", {
+  suppressMessages(ans <- data_ssvd_hfd(asfr_subset, age_max = 50))
   expect_true(tibble::is_tibble(ans))
-  expect_identical(min(ans$age), 12L)
-  expect_identical(max(ans$age), 55L)
-})
-
-test_that("'hfd_tidy' throws correct error when variable missing", {
-  data <- asfr
-  data <- data[-match("Age", names(data))]
-  expect_error(hfd_tidy(data),
-               "`data` does not have a column called \"Age\"")
 })
 
 
@@ -36,57 +17,14 @@ test_that("'hfd_get_data_one' works", {
   labels_age <- c("20-24", "25-29", "30-34", "35-39")
   ans_obtained <- hfd_get_data_one(data = data,
                                    labels_age = labels_age)
-  ans_expected <- data.frame(age = factor(c("20-24", "25-29", "30+")),
-                             val = c(2L, 1L, 4L))
+  ans_expected <- data.frame(country = "a",
+                             time = 2000,
+                             age = factor(c("20-24", "25-29", "30-34", "35-39")),
+                             value = c(sum(1:13),
+                                       sum(14:18),
+                                       sum(19:23),
+                                       sum(24:40)))
   expect_identical(ans_obtained, ans_expected)
-})
-
-
-## 'hfd_indep' ----------------------------------------------------------------
-
-test_that("'hfd_indep' works with valid inputs", {
-  data <- expand.grid(country = 1:2,
-                      sex = c("Female", "Male", "Total"),
-                      age = c(poputils::age_labels(type = "five",
-                                                 min = 15,
-                                                 max = 65,
-                                                 open = TRUE),
-                              "60+"),
-                      time = 2001:2005)
-  data$value <- runif(n = nrow(data))
-  labels_age <- hfd_make_labels_age(data = data, age_max = 65)
-  ans_obtained <- hfd_indep(data, labels_age = labels_age, n_comp = 5)
-  expect_setequal(names(ans_obtained),
-                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
-  expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
-  expect_identical(rownames(ans_obtained$matrix[[1]]),
-                   paste(ans_obtained$labels_sexgender[[1]],
-                         ans_obtained$labels_age[[1]],
-                         sep = "."))
-})
-
-
-## 'hfd_joint' ----------------------------------------------------------------
-
-test_that("'hfd_joint' works with valid inputs", {
-  data <- expand.grid(country = 1:2,
-                      sex = c("Female", "Male", "Total"),
-                      age = c(poputils::age_labels(type = "five",
-                                                 min = 15,
-                                                 max = 65,
-                                                 open = TRUE),
-                              "60+"),
-                      time = 2001:2005)
-  data$value <- runif(n = nrow(data))
-  labels_age <- hfd_make_labels_age(data = data, age_max = 65)
-  ans_obtained <- hfd_joint(data, labels_age = labels_age, n_comp = 5)
-  expect_setequal(names(ans_obtained),
-                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
-  expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
-  expect_identical(rownames(ans_obtained$matrix[[1]]),
-                   paste(ans_obtained$labels_sexgender[[1]],
-                         ans_obtained$labels_age[[1]],
-                         sep = "."))
 })
 
 
@@ -157,11 +95,29 @@ test_that("'hfd_make_labels_age' works - thows appropriate error when is factor"
 })
 
 
+## 'hfd_tidy' -----------------------------------------------------------------
+
+test_that("'hfd_tidy' works with valid inputs", {
+  ans <- hfd_tidy(asfr_subset)
+  expect_setequal(names(ans),
+                  c("country", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+  expect_identical(min(ans$age), 12L)
+  expect_identical(max(ans$age), 55L)
+})
+
+test_that("'hfd_tidy' throws correct error when variable missing", {
+  data <- asfr_subset
+  data <- data[-match("Age", names(data))]
+  expect_error(hfd_tidy(data),
+               "`data` does not have a column called \"Age\"")
+})
+
+
 ## 'hfd_total' ----------------------------------------------------------------
 
 test_that("'hfd_total' works with valid inputs", {
   data <- expand.grid(country = 1:2,
-                      sex = c("Female", "Male", "Total"),
                       age = 15:54,
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))

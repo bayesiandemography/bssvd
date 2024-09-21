@@ -33,7 +33,7 @@ url <- paste("https://sdmx.oecd.org/public/rest/data",
              "all?dimensionAtObservation=AllDimensions",
              sep = "/")
 lfp_sdmx <- rsdmx::readSDMX(url)    ## can be slow
-data <- as.data.frame(lfp_sdmx)     ## can also be slow
+lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 }\if{html}{\out{</div>}}
 
 \strong{Step 2: Call function 'data_ssvd_lfp()'}
@@ -43,14 +43,14 @@ data <- as.data.frame(lfp_sdmx)     ## can also be slow
 }
 
 \examples{
-lfp_data_small <- data_ssvd_lfp(oecd_lfp)
+data <- data_ssvd_lfp(oecd_lfp_subset)
+data
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on age-specific fertility rates
-from Human Fertility Database.
-\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on age-specific mortality rates
-from Human Mortality Database.
-\item \code{\link[bage:ssvd]{bage::ssvd()}} Create Scaled SVD object
+\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on fertility
+from the Human Fertility Database
+\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on mortality
+from the Human Mortality Database
 }
 }

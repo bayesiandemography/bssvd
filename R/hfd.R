@@ -1,10 +1,32 @@
 
 ## HAS_TESTS
-#' Create a Scaled SVD Object from HFD Age-Specific Fertility Data
+#' Prepare Data from the Human Fertility Database
 #'
-#' Create an object of class [`"bage_ssvd"`][bage::ssvd()]
-#' from age-specific fertility data from the 
+#' Process age-specific fertility data from the 
 #' the [Human Fertility Database](https://www.humanfertility.org/Home/Index).
+#'
+#' @section Usage:
+#' **Step 1: Download data**
+#'
+#' Register or log in at the Human Fertility Database,
+#' and go to page
+#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
+#' Go to the "By statistic" table, and
+#' download the file from the "Age-specific fertility rate" row.
+#'
+#' **Step 2: Call function 'ssvd_hfd'**
+#'
+#' Extract the file `asfrRR.txt` from the downloaded data,
+#' and read in the contents,
+#' ```
+#' asfr <- readr::read_table("asfrRR.txt", skip = 2)
+#' ```
+#'
+#' **Step 3: Call function 'data_ssvd_hfd'**
+#'
+#' ```
+#' hfd_data <- data_ssvd_hfd(asfr)
+#' ```
 #'
 #' @section Lowest and highest ages:
 #'
@@ -23,108 +45,87 @@
 #'
 #' This shifting of ASFRs is common in analyses of fertility.
 #'
-#' @section Usage:
-#' **Step 1: Download data**
-#'
-#' Register or log in at the Human Fertility Database,
-#' and go to page
-#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
-#' Go to the "By statistic" table, and
-#' download the file from the "Age-specific fertility rate" row.
-#'
-#' **Step 2: Call function 'ssvd_hfd'**
-#'
-#' Extract the file `asfrRR.txt` from the downloaded data,
-#' and read in the contents,
-#' ```
-#' data <- readr::read_table("asfrRR.txt", skip = 2)
-#' ```
-#'
-#' **Step 3: Call function 'ssvd_hfd'**
-#'
-#' ```
-#' HFD <- ssvd_hfd(data)
-#' ```
 #' @param data A data frame containing HFD data.
-#' @param age_min_max, age_max_min Every age classification
+#' @param age_min_max,age_max_min Every age classification
 #' must at least span the range `[age_min_max, age_max_min)`.
 #' Defaults are `15` and `50`.
 #' @param n_comp Number of SVD components
 #' to include in result. Default is `5`.
 #'
-#' @returns An object of class [`"bage_ssvd"`][ssvd()]
+#' @returns A tibble with the format required by
+#' `bage::ssvd()`.
 #'
 #' @seealso
-#' - [hfd_tidy()] Tidy raw data, but do not process into SVD object.
-#' - [ssvd_lfp()] Created scaled SVD object from OECD labour force
-#'   participation rate data.
-#' - [bage::SVD()], [bage::SVDS()] to use an object of class
-#'   [`"bage_ssvd"`][bage::ssvd()] in a prior.
+#' - [data_ssvd_hmd()] Prepare data on age-specific mortality
+#'   from the Human Mortality Database
+#' - [data_ssvd_lfp()] Prepare data on labour force participation
+#'   from the OCED
 #'
 #' @examples
-#' HFD_small <- ssvd_hfd(asfr)
+#' data <- data_ssvd_hfd(asfr_subset)
+#' data
 #' @export
-ssvd_hfd <- function(data,
-                     age_min_max = 15,
-                     age_max_min = 50,
-                     n_comp = 5) {
-  check_n(n = age_min_max,
-          nm_n = "age_min_max",
-          min = NULL,
-          max = 15L,
-          divisible_by = 1L)
-  check_n(n = age_max_min,
-          nm_n = "age_max_min",
-          min = 45L,
-          max = NULL,
-          divisible_by = 5L)
-  check_n(n = n_comp,
-          nm_n = "n_comp",
-          min = 3L,
-          max = 6L,
-          divisible_by = 1L)
+data_ssvd_hfd <- function(data,
+                          age_min_max = 15,
+                          age_max_min = 50,
+                          n_comp = 5) {
+  poputils::check_n(n = age_min_max,
+                    nm_n = "age_min_max",
+                    min = NULL,
+                    max = 15L,
+                    divisible_by = NULL)
+  poputils::check_n(n = age_max_min,
+                    nm_n = "age_max_min",
+                    min = 45L,
+                    max = NULL,
+                    divisible_by = 5L)
+  poputils::check_n(n = n_comp,
+                    nm_n = "n_comp",
+                    min = 3L,
+                    max = 6L,
+                    divisible_by = NULL)
   cli::cli_progress_message("Tidying data...")
   data <- hfd_tidy(data)
   labels_age <- hfd_make_labels_age(data = data,
                                     age_min_max = age_min_max,
                                     age_max_min = age_max_min)
   cli::cli_progress_message("Carrying out SVD for 'total'...")
-  hfd_total(data = data, labels_age = labels_age, n_comp = n_comp)
-  ssvd(data)
+  hfd_total(data = data,
+            labels_age = labels_age,
+            n_comp = n_comp)
 }
 
 
 ## HAS_TESTS
-#' Tidy HFD Age-Specific Fertility Data
+#' Get Data For One Set of Age Labels
 #'
-#' Tidy data frame containing data from
-#' the ASFR row of the "By statistic" table of
-#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
+#' Aggregate when age labels are for five years.
 #'
 #' @param data A data frame
+#' @param labels_age A character vector
 #'
-#' @returns A tibble.
+#' @returns A data frame
 #'
-#' @seealso
-#' - [ssvd_hfd()] Tidy data, and convert it into
-#'   and an SVD object.
-#' - [lfp_tidy()] Tidy OECD data on labour force participation.
-#'
-#' @examples
-#' hfd_tidy(asfr)
-#' @export
-hfd_tidy <- function(data) {
-  nms_required <- c("Code", "Year", "Age", "ASFR")
-  nms_obtained <- names(data)
-  for (nm in nms_required)
-    if (!(nm %in% nms_obtained))
-      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
-  ans <- data[nms_required]
-  names(ans) <- c("country", "time", "age", "value")
-  ans$age <- sub("^([0-9]+)-$", "\\1", ans$age)
-  ans$age <- sub("^([0-9]+)\\+$", "\\1", ans$age)
-  ans$age <- as.integer(ans$age)
-  ans <- tibble::tibble(ans)
+#' @noRd
+hfd_get_data_one <- function(data, labels_age) {
+  age_lower_labels <- poputils::age_lower(labels_age)
+  age_upper_labels <- poputils::age_upper(labels_age)
+  is_open_labels <- any(is.infinite(age_upper_labels))
+  if (is_open_labels)
+    cli::cli_abort("Internal error: Age labels include open age group.")
+  age_type <- poputils::age_group_type(labels_age)
+  min_labels_age <- min(age_lower_labels)
+  max_labels_age <- max(age_lower_labels)
+  age_lower_data <- poputils::age_lower(data$age)
+  data$age[age_lower_data < min_labels_age] <- min_labels_age
+  data$age[age_lower_data > max_labels_age] <- max_labels_age
+  if (age_type == "five")
+    data$age <- poputils::combine_age(data$age, to = "five")
+  ans <- stats::aggregate(data["value"], data[c("country", "time", "age")], sum)
+  ans$age <- factor(ans$age, levels = labels_age)
+  ord <- order(ans$age)
+  ans <- ans[ord, , drop = FALSE]
+  rownames(ans) <- NULL
   ans
 }
 
@@ -183,40 +184,52 @@ hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
 }
 
 
-#' Get Data For One Set of Age Labels
+
+## HAS_TESTS
+#' Tidy HFD Age-Specific Fertility Data
 #'
-#' Aggregate when age labels are for five years.
+#' Tidy data frame containing data from
+#' the ASFR row of the "By statistic" table of
+#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
 #'
 #' @param data A data frame
-#' @param labels_age A character vector
 #'
-#' @returns A data frame
+#' @returns A tibble.
 #'
-#' @noRd
-hfd_get_data_one <- function(data, labels_age) {
-  age_lower_labels <- poputils::age_lower(labels_age)
-  age_upper_labels <- poputils::age_upper(labels_age)
-  is_open_labels <- any(is.infinite(age_upper_labels))
-  if (is_open_labels)
-    cli::cli_abort("Internal error: Age labels include open age group.")
-  age_type <- poputils::age_group_type(labels_age)
-  min_labels_age <- min(age_lower_labels)
-  max_labels_age <- max(age_lower_labels)
-  age_lower_data <- poputils::age_lower(data$age)
-  data$age[age_lower_data < min_labels_age] <- min_labels_age
-  data$age[age_lower_data > max_labels_age] <- max_labels_age
-  if (age_type == "five")
-    data$age <- poputils::combine_age(data$age, to = "five")
-  ans <- stats::aggregate(data["value"], data[c("country", "time", "age")], sum)
-  ans$age <- factor(ans$age, levels = labels_age)
-  ord <- order(ans$age)
-  ans <- ans[ord, ]
-  rownames(ans) <- NULL
+#' @seealso
+#' - [data_ssvd_hmd()] Prepare data on mortality
+#'   from Human Mortality Database
+#' - [data_ssvd_lfp()] Prepare data on labour force participation
+#'   from the OCED
+#'
+#' @examples
+#' hfd_tidy(asfr_subset)
+#' @export
+hfd_tidy <- function(data) {
+  nms_required <- c("Code", "Year", "Age", "ASFR")
+  nms_obtained <- names(data)
+  for (nm in nms_required)
+    if (!(nm %in% nms_obtained))
+      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
+  ans <- data[nms_required]
+  names(ans) <- c("country", "time", "age", "value")
+  ans$age <- sub("^([0-9]+)-$", "\\1", ans$age)
+  ans$age <- sub("^([0-9]+)\\+$", "\\1", ans$age)
+  ans$age <- as.integer(ans$age)
+  ans <- tibble::tibble(ans)
   ans
 }
 
 
-
+## HAS_TESTS
+#' Prepare Inputs for "total" Type, ie No Sex/Gender
+#'
+#' @param data A data frame
+#' @param labels_age List of character vectors
+#' @param n_comp Numbers of SVD components
+#'
+#' @returns A data frame
+#'
 #' @noRd
 hfd_total <- function(data, labels_age, n_comp) {
   data_split <- .mapply(hfd_get_data_one,

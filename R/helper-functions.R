@@ -86,11 +86,11 @@ get_ages_max <- function(age, age_max) {
 #' @export
 make_matrix_and_offset <- function(x, transform = c("log", "logit", "none"), n_comp = 10) {
   ## check 'n_comp'
-  check_n(n = n_comp,
-          nm_n = "n_comp",
-          min = 1L,
-          max = NULL,
-          divisible_by = 1L)
+  poputils::check_n(n = n_comp,
+                    nm_n = "n_comp",
+                    min = 1L,
+                    max = NULL,
+                    divisible_by = NULL)
   ## check 'x'
   check_is_matrix(x, nm_x = "x")
   check_numeric(x, nm_x = "x")
