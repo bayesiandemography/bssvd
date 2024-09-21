@@ -26,8 +26,6 @@ Suggests:
     rsdmx,
     testthat (>= 3.0.0),
     utils
-Remotes:
-    bayesiandemography/poputils
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
