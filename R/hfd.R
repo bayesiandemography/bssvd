@@ -1,5 +1,48 @@
 
 ## HAS_TESTS
+#' Obtain Coefficients from Scaled SVD of HFD Data
+#'
+#' Obtain time series of coefficients from a
+#' scaled SVD of 
+#' [Human Fertility Database](https://www.humanfertility.org/Home/Index)
+#' data.
+#' 
+#' Obtain a scaled version of the \eqn{U} matrix,
+#' produced as part of the SVD of log age-specific
+#' fertility rates from the HFD.
+#'
+#' @param data A data frame containing HFD data.
+#' @param n_comp Number of SVD components
+#' to include in result. Default is `5`.
+#'
+#' @returns A tibble
+#'
+#' @seealso
+#' - [data_ssvd_hfd()] Prepare data on fertility
+#'   from the Human Fertility Database
+#' - [coef_hmd()] Obtain coefficients
+#'   for Human Mortality Database data
+#' - [coef_lfp()] Obtain coefficients
+#'   for OECD Labor Force Participation data
+#'
+#' @examples
+#' coef_hfd(asfr_subset)
+#' @export
+coef_hfd <- function(data, n_comp = 5) {
+  poputils::check_n(n = n_comp,
+                    nm_n = "n_comp",
+                    min = 3L,
+                    max = 6L,
+                    divisible_by = NULL)
+  n_comp <- as.integer(n_comp)
+  cli::cli_progress_message("Tidying data...")
+  data <- hfd_tidy(data)
+  cli::cli_progress_message("Calculating coefficients...")
+  hfd_calculate_coef(data = data, n_comp = n_comp)
+}
+
+
+## HAS_TESTS
 #' Prepare Data from the Human Fertility Database
 #'
 #' Process age-specific fertility data from the 
@@ -14,7 +57,7 @@
 #' Go to the "By statistic" table, and
 #' download the file from the "Age-specific fertility rate" row.
 #'
-#' **Step 2: Call function 'ssvd_hfd'**
+#' **Step 2: Extract `asfrRR.txt`**
 #'
 #' Extract the file `asfrRR.txt` from the downloaded data,
 #' and read in the contents,
@@ -45,12 +88,10 @@
 #'
 #' This shifting of ASFRs is common in analyses of fertility.
 #'
-#' @param data A data frame containing HFD data.
+#' @inheritParams coef_hfd
 #' @param age_min_max,age_max_min Every age classification
 #' must at least span the range `[age_min_max, age_max_min)`.
 #' Defaults are `15` and `50`.
-#' @param n_comp Number of SVD components
-#' to include in result. Default is `5`.
 #'
 #' @returns A tibble with the format required by
 #' `bage::ssvd()`.
@@ -94,6 +135,44 @@ data_ssvd_hfd <- function(data,
             labels_age = labels_age,
             n_comp = n_comp)
 }
+
+
+## HAS_TESTS
+#' Obtain the Scaled 'U' Matrix From an SVD of HFD Data
+#'
+#' @param data A data frame, typically produced by 'hfd_tidy'.
+#' @param n_comp Number of components.
+#'
+#' @returns A tibble
+#' 
+#' @noRd
+hfd_calculate_coef <- function(data, n_comp) {
+  data$age <- poputils::reformat_age(data$age)
+  ord <- with(data, order(country, time, age))
+  data <- data[ord, , drop = FALSE]
+  ans <- poputils::to_matrix(data,
+                             rows = "age",
+                             cols = c("country", "time"),
+                             measure = "value")
+  and <- remove_cols_with_na(x = ans, n_comp = n_comp)
+  ans <- replace_zeros(ans)
+  ans <- log(ans)
+  country_time <- colnames(ans)
+  ans <- svd(ans, nu = 0L, nv = n_comp)$v
+  ans <- scale(ans, center = TRUE, scale = TRUE)
+  dimnames(ans) <- list(country_time = country_time,
+                        component = paste("Component", seq_len(n_comp)))
+  ans <- as.data.frame.table(ans, responseName = "coef", stringsAsFactors = FALSE)
+  p <- "^(.*)\\.(.*)$"
+  ans$country <- sub(p, "\\1", ans$country_time)
+  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
+  ans <- ans[c("country", "time", "component", "coef")]
+  ans <- tibble::tibble(ans)
+  ans
+}
+
+
+  
 
 
 ## HAS_TESTS

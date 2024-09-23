@@ -1,4 +1,16 @@
 
+## 'coef_hmd' -----------------------------------------------------------------
+
+test_that("'coef_hmd' works with valid inputs", {
+  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
+  suppressMessages(ans <- coef_hmd(fn))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+
 ## 'data_ssvd_hmd' -----------------------------------------------------------------
 
 test_that("'data_ssvd_hmd' works with valid inputs", {
@@ -49,6 +61,24 @@ test_that("'hmd_aggregate_mx_Lx' works with valid inputs", {
                     "0",  2001,  "Total",   "a",      "lt",     0.4*0.1+0.6*0.2, 2+3,
                     "1-4",2001,  "Total",   "a",      "lt",     0.5*0.1 + 0.5*0.2, 0+0)
   expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'hmd_calculate_coef' -------------------------------------------------------
+
+test_that("'hmd_calculate_coef' works with valid inputs", {
+  set.seed(0)
+  data <- expand.grid(age = poputils::age_labels(type = "single", max = 45),
+                      sex = c("Female", "Male"),
+                      time = 2001:2005,
+                      country = c("A", "B", "C"),
+                      type_age = "single",
+                      age_open = 45)
+  data$mx <- runif(n = nrow(data))
+  ans_obtained <- hmd_calculate_coef(data, n_comp = 5)
+  expect_setequal(names(ans_obtained),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans_obtained$coef), 0)
 })
 
 

@@ -1,11 +1,39 @@
 
-## 'data_ssvd_lfp' -----------------------------------------------------------------
+## 'coef_lfp' -----------------------------------------------------------------
+
+test_that("'coef_lfp' works with valid inputs", {
+  suppressMessages(ans <- coef_lfp(oecd_lfp_subset))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+
+## 'data_ssvd_lfp' ------------------------------------------------------------
 
 test_that("'ssvd_lfp' works with valid inputs", {
   suppressMessages(data <- data_ssvd_lfp(oecd_lfp_subset, age_max = 65))
   expect_true(tibble::is_tibble(data))
   ## ans <- bage::ssvd(data)
   ## expect_s3_class(ans, "bage_ssvd")
+})
+
+
+## 'lfp_calculate_coef' -------------------------------------------------------
+
+test_that("'lfp_calculate_coef' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = poputils::age_labels(type = "five",
+                                                 min = 15,
+                                                 max = 70,
+                                                 open = TRUE),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  ans_obtained <- lfp_calculate_coef(data, n_comp = 5)
+  expect_setequal(names(ans_obtained),
+                  c("sex", "country", "time", "component", "coef"))
 })
 
 

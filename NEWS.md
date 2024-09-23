@@ -1,4 +1,8 @@
 
+# bssvd 0.2.0
+
+* Added functions `coef_hfd()`, `coef_hmd()`, and `coef_lfp()`
+
 # bssvd 0.1.2
 
 * Finished `data_ssvd_hfd()`

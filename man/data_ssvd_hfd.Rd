@@ -34,7 +34,7 @@ and go to page
 Go to the "By statistic" table, and
 download the file from the "Age-specific fertility rate" row.
 
-\strong{Step 2: Call function 'ssvd_hfd'}
+\strong{Step 2: Extract \code{asfrRR.txt}}
 
 Extract the file \code{asfrRR.txt} from the downloaded data,
 and read in the contents,

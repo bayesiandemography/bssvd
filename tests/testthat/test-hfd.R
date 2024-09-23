@@ -1,9 +1,31 @@
 
+## 'coef_hfd' -----------------------------------------------------------------
+
+test_that("'coef_hfd' works with valid inputs", {
+  suppressMessages(ans <- coef_hfd(asfr_subset, n_comp = 5L))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+
 ## 'data_ssvd_hfd' ------------------------------------------------------------
 
 test_that("'data_ssvd_hfd' works with valid inputs", {
   suppressMessages(ans <- data_ssvd_hfd(asfr_subset, age_max = 50))
   expect_true(tibble::is_tibble(ans))
+})
+
+
+## 'hfd_calculate_coef' -------------------------------------------------------
+
+test_that("'hfd_calculate_coef' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      age = 15:54,
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  ans <- hfd_calculate_coef(data, n_comp = 5)
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
 })
 
 
