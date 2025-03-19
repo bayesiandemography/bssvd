@@ -49,6 +49,18 @@ test_that("'hfd_get_data_one' works", {
   expect_identical(ans_obtained, ans_expected)
 })
 
+test_that("'hfd_get_data_one' throws appropriate error with open age group", {
+  data <- data.frame(age = 12:51,
+                     country = "a",
+                     time = 2000,
+                     value = 1:40)
+  labels_age <- c("20-24", "25-29", "30-34", "35-39", "40+")
+  expect_error(hfd_get_data_one(data = data,
+                                labels_age = labels_age),
+               "Internal error: Age labels include open age group.")
+})
+
+
 
 ## 'hfd_make_labels_age' ------------------------------------------------------
 

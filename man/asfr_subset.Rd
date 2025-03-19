@@ -6,8 +6,8 @@
 \title{Human Fertility Database Data on
 Age-Specific Fertility Rates}
 \format{
-A tibble with 33572 rows and the following
-columns: \code{Code}, \code{Year}, \code{Age},\code{ASFR}.
+A tibble with 33,572 rows and with
+columns \code{Code}, \code{Year}, \code{Age},\code{ASFR}.
 }
 \source{
 Downloaded from the "Age-specific fertility rate"
@@ -21,13 +21,13 @@ asfr_subset
 }
 \description{
 Fertility rates by single year of age,
-by county, by calendar year.
+by county, by calendar year,
 from the Human Fertility Database.
 }
 \details{
 \code{asfr_subset} is for testing, rather than data analysis.
-It only contains data for the period 1980-2000,
-and is not kept up-to-date. Data for analysis
+It is restricted to the period 1980-2000,
+and is not kept up to date. Data for analysis
 should be obtained from the HFD itself.
 }
 \keyword{datasets}

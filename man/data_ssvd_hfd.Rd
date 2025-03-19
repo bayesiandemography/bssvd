@@ -17,12 +17,12 @@ Defaults are \code{15} and \code{50}.}
 to include in result. Default is \code{5}.}
 }
 \value{
-A tibble with the format required by
-\code{bage::ssvd()}.
+A tibble
 }
 \description{
 Process age-specific fertility data from the
-the \href{https://www.humanfertility.org/Home/Index}{Human Fertility Database}.
+the \href{https://www.humanfertility.org/Home/Index}{Human Fertility Database}
+so that it is ready to create a scaled SVD.
 }
 \section{Usage}{
 
@@ -42,7 +42,7 @@ and read in the contents,
 \if{html}{\out{<div class="sourceCode">}}\preformatted{asfr <- readr::read_table("asfrRR.txt", skip = 2)
 }\if{html}{\out{</div>}}
 
-\strong{Step 3: Call function 'data_ssvd_hfd'}
+\strong{Step 3: Call function \code{data_ssvd_hfd()}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{hfd_data <- data_ssvd_hfd(asfr)
 }\if{html}{\out{</div>}}

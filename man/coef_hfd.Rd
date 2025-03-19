@@ -17,14 +17,11 @@ A tibble
 }
 \description{
 Obtain time series of coefficients from a
-scaled SVD of
-\href{https://www.humanfertility.org/Home/Index}{Human Fertility Database}
-data.
-}
-\details{
-Obtain a scaled version of the \eqn{U} matrix,
-produced as part of the SVD of log age-specific
-fertility rates from the HFD.
+scaled SVD of data from the
+\href{https://www.humanfertility.org/Home/Index}{Human Fertility Database}.
+The coefficents are a
+scaled version of the \eqn{U} matrix
+from the SVD.
 }
 \examples{
 coef_hfd(asfr_subset)

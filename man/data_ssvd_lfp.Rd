@@ -16,12 +16,12 @@ oldest closed age group. Default is \code{75}.}
 to include in result. Default is \code{5}.}
 }
 \value{
-A tibble with the format required by
-function \code{bage::ssvd()}.
+A tibble
 }
 \description{
 Process labour force participation data downloaded from
-the \href{https://data-explorer.oecd.org}{OECD Data Explorer}.
+the \href{https://data-explorer.oecd.org}{OECD Data Explorer}
+so it is ready to create a scaled SVD.
 }
 \section{Usage}{
 
@@ -36,7 +36,7 @@ lfp_sdmx <- rsdmx::readSDMX(url)    ## can be slow
 lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 }\if{html}{\out{</div>}}
 
-\strong{Step 2: Call function 'data_ssvd_lfp()'}
+\strong{Step 2: Call function \code{data_ssvd_lfp()}}
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{lfp_data <- data_ssvd_lfp(data)
 }\if{html}{\out{</div>}}

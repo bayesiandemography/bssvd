@@ -5,8 +5,8 @@
 \alias{oecd_lfp_subset}
 \title{OECD Data on Labour Force Participation}
 \format{
-A tibble with 12069 rows and the following
-columns: \code{TIME_PERIOD}, \code{REF_AREA},
+A tibble with 12,069 rows and with
+columns \code{TIME_PERIOD}, \code{REF_AREA},
 \code{MEASURE},\code{UNIT_MEASURE}, \code{SEX}, \code{AGE},
 \verb{LABOUR FORCE STATUS}, \code{obsValue}, \code{DECIMALS},
 \code{OBS_STATUS}.
@@ -17,7 +17,7 @@ Downloaded from table
 age group and sex - indicators" from
 \href{https://data-explorer.oecd.org}{OECD Data Explorer}.
 Accessed 21 April 2024.
-Only a subset of the full dataset is included
+Only a subset of the data is included
 in \code{oecd_lfp_subset}.
 }
 \usage{
@@ -26,7 +26,7 @@ oecd_lfp_subset
 \description{
 Data on labour force participation rates
 by age and sex, for
-multiple countries, starting for 2010--2012
+multiple countries in 2010--2012,
 extracted from the OECD Data Explorer database.
 }
 \details{

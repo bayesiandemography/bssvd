@@ -22,14 +22,12 @@ get_ages_max <- function(age, age_max) {
 
 
 ## HAS_TESTS
-#' Create components needed by a ssvd object
+#' Create Components Needed by a Scaled SVD Object
 #'
 #' Use the [Singular Value Decomposition][base::svd()]
 #' (SVD) to construct a parsimonious representation
 #' of a set of rates, probabilities, means, or
-#' other values.
-#'
-#' `make_matrix_and_offset() typically proceeds as follows:
+#' other values. The construction proceeds as follows:
 #' - transform values in matrix `x` (eg take logs)
 #' - carry out a SVD on the transformed version of `x`
 #' - centre and scale the results from the SVD to produce
@@ -61,6 +59,7 @@ get_ages_max <- function(age, age_max) {
 #' `make_matrix_and_offset()` converts any `0`s in
 #' `x` to values just above `0` before
 #' applying the log or logit function.
+#' 
 #' When `scale` is `"logit"`,
 #' `make_matrix_and_offset() also converts any
 #' `1`s to values just below `1`.
@@ -84,7 +83,9 @@ get_ages_max <- function(age, age_max) {
 #' make_matrix_and_offset(x, transform = "none")
 #' make_matrix_and_offset(x, n_comp = 2)
 #' @export
-make_matrix_and_offset <- function(x, transform = c("log", "logit", "none"), n_comp = 10) {
+make_matrix_and_offset <- function(x,
+                                   transform = c("log", "logit", "none"),
+                                   n_comp = 10) {
   ## check 'n_comp'
   poputils::check_n(n = n_comp,
                     nm_n = "n_comp",

@@ -3,12 +3,13 @@
 #' Obtain Coefficients from Scaled SVD of OCED
 #' Labour Force Participation Data
 #'
-#' Obtain time series of coefficients from a
+#' Obtain coefficients from a
 #' scaled SVD of OCED labour force participation
 #' data downloaded from
 #' the [OECD Data Explorer](https://data-explorer.oecd.org).
-#' The coefficients are the elements of a 
-#' scaled version of the \eqn{U} matrix.
+#' The coefficients are a 
+#' scaled version of the \eqn{U} matrix
+#' from the SVD.
 #'
 #' @param data A data frame containing OECD data.
 #' @param n_comp Number of SVD components
@@ -47,7 +48,8 @@ coef_lfp <- function(data, n_comp = 5) {
 #' Prepare OECD Data on Labour Force Participation Rates
 #'
 #' Process labour force participation data downloaded from
-#' the [OECD Data Explorer](https://data-explorer.oecd.org). 
+#' the [OECD Data Explorer](https://data-explorer.oecd.org)
+#' so it is ready to create a scaled SVD.
 #'
 #' @section Usage:
 #' **Step 1: Download data**
@@ -62,7 +64,7 @@ coef_lfp <- function(data, n_comp = 5) {
 #' lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 #' ```
 #'
-#' **Step 2: Call function 'data_ssvd_lfp()'**
+#' **Step 2: Call function `data_ssvd_lfp()`**
 #'
 #' ```
 #' lfp_data <- data_ssvd_lfp(data)
@@ -72,8 +74,7 @@ coef_lfp <- function(data, n_comp = 5) {
 #' @param age_max The upper limit of the
 #' oldest closed age group. Default is `75`.
 #'
-#' @returns A tibble with the format required by
-#' function `bage::ssvd()`.
+#' @returns A tibble
 #'
 #' @seealso
 #' - [data_ssvd_hfd()] Prepare data on fertility
@@ -137,9 +138,10 @@ lfp_calculate_coef <- function(data, n_comp) {
                 rows = "age",
                 cols = c("country", "time"),
                 measure = "value")
-  country_time <- lapply(ans, colnames)
+  ans <- lapply(ans, remove_cols_with_na, n_comp = n_comp)
   ans <- lapply(ans, replace_zeros)
   ans <- lapply(ans, log)
+  country_time <- lapply(ans, colnames)
   ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
   ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
   for (i in seq_along(ans)) {
@@ -156,7 +158,6 @@ lfp_calculate_coef <- function(data, n_comp) {
   ans <- tibble::tibble(ans)
   ans
 }
-
 
 
 ## HAS_TESTS

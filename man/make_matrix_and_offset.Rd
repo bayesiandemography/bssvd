@@ -2,7 +2,7 @@
 % Please edit documentation in R/helper-functions.R
 \name{make_matrix_and_offset}
 \alias{make_matrix_and_offset}
-\title{Create components needed by a ssvd object}
+\title{Create Components Needed by a Scaled SVD Object}
 \usage{
 make_matrix_and_offset(x, transform = c("log", "logit", "none"), n_comp = 10)
 }
@@ -26,17 +26,15 @@ A named list with two elements:
 Use the \link[base:svd]{Singular Value Decomposition}
 (SVD) to construct a parsimonious representation
 of a set of rates, probabilities, means, or
-other values.
-}
-\details{
-`make_matrix_and_offset() typically proceeds as follows:
+other values. The construction proceeds as follows:
 \itemize{
 \item transform values in matrix \code{x} (eg take logs)
 \item carry out a SVD on the transformed version of \code{x}
 \item centre and scale the results from the SVD to produce
 matrix \code{matrix} and vector \code{offset}.
 }
-
+}
+\details{
 If
 \itemize{
 \item \eqn{X} is a the matrix of transformed values
@@ -65,6 +63,7 @@ When \code{scale} is \code{"log"} or \code{"logit"},
 \code{make_matrix_and_offset()} converts any \code{0}s in
 \code{x} to values just above \code{0} before
 applying the log or logit function.
+
 When \code{scale} is \code{"logit"},
 \verb{make_matrix_and_offset() also converts any }1\verb{s to values just below }1`.
 }

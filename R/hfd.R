@@ -3,13 +3,11 @@
 #' Obtain Coefficients from Scaled SVD of HFD Data
 #'
 #' Obtain time series of coefficients from a
-#' scaled SVD of 
-#' [Human Fertility Database](https://www.humanfertility.org/Home/Index)
-#' data.
-#' 
-#' Obtain a scaled version of the \eqn{U} matrix,
-#' produced as part of the SVD of log age-specific
-#' fertility rates from the HFD.
+#' scaled SVD of data from the
+#' [Human Fertility Database](https://www.humanfertility.org/Home/Index).
+#' The coefficents are a
+#' scaled version of the \eqn{U} matrix
+#' from the SVD.
 #'
 #' @param data A data frame containing HFD data.
 #' @param n_comp Number of SVD components
@@ -46,7 +44,8 @@ coef_hfd <- function(data, n_comp = 5) {
 #' Prepare Data from the Human Fertility Database
 #'
 #' Process age-specific fertility data from the 
-#' the [Human Fertility Database](https://www.humanfertility.org/Home/Index).
+#' the [Human Fertility Database](https://www.humanfertility.org/Home/Index)
+#' so that it is ready to create a scaled SVD.
 #'
 #' @section Usage:
 #' **Step 1: Download data**
@@ -65,7 +64,7 @@ coef_hfd <- function(data, n_comp = 5) {
 #' asfr <- readr::read_table("asfrRR.txt", skip = 2)
 #' ```
 #'
-#' **Step 3: Call function 'data_ssvd_hfd'**
+#' **Step 3: Call function `data_ssvd_hfd()`**
 #'
 #' ```
 #' hfd_data <- data_ssvd_hfd(asfr)
@@ -93,8 +92,7 @@ coef_hfd <- function(data, n_comp = 5) {
 #' must at least span the range `[age_min_max, age_max_min)`.
 #' Defaults are `15` and `50`.
 #'
-#' @returns A tibble with the format required by
-#' `bage::ssvd()`.
+#' @returns A tibble
 #'
 #' @seealso
 #' - [data_ssvd_hmd()] Prepare data on age-specific mortality
@@ -154,7 +152,7 @@ hfd_calculate_coef <- function(data, n_comp) {
                              rows = "age",
                              cols = c("country", "time"),
                              measure = "value")
-  and <- remove_cols_with_na(x = ans, n_comp = n_comp)
+  ans <- remove_cols_with_na(x = ans, n_comp = n_comp)
   ans <- replace_zeros(ans)
   ans <- log(ans)
   country_time <- colnames(ans)
@@ -169,10 +167,7 @@ hfd_calculate_coef <- function(data, n_comp) {
   ans <- ans[c("country", "time", "component", "coef")]
   ans <- tibble::tibble(ans)
   ans
-}
-
-
-  
+}  
 
 
 ## HAS_TESTS
@@ -267,7 +262,7 @@ hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
 ## HAS_TESTS
 #' Tidy HFD Age-Specific Fertility Data
 #'
-#' Tidy data frame containing data from
+#' Tidy a data frame containing data from
 #' the ASFR row of the "By statistic" table of
 #' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
 #'

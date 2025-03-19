@@ -15,13 +15,13 @@ A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 to include in result. Default is \code{5}.}
 }
 \value{
-A tibble with the format required by
-\code{bage::ssvd()}.
+A tibble
 }
 \description{
 Process data on age-specific mortality rates
 from a zipped file downloaded from the
-\href{https://www.mortality.org/Data/ZippedDataFiles}{Human Mortality Database}.
+\href{https://www.mortality.org/Data/ZippedDataFiles}{Human Mortality Database}
+so that it is ready to created a scaled SVD.
 }
 \section{Usage}{
 
@@ -34,7 +34,7 @@ download a file from the "Statistics" column, eg file
 
 https://www.mortality.org/File/Download/hmd.v6/zip/all_hmd/hmd_statistics_20240226.zip
 
-\strong{Step 2: Call function 'data_ssvd_hmd'}
+\strong{Step 2: Call function \code{data_ssvd_hmd()}}
 
 Put the file into the working directory, and supply the name of the file
 to function \code{data_ssvd_hmd()}, eg

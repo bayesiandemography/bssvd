@@ -17,12 +17,13 @@ to include in result. Default is \code{5}.}
 A tibble
 }
 \description{
-Obtain time series of coefficients from a
+Obtain coefficients from a
 scaled SVD of OCED labour force participation
 data downloaded from
 the \href{https://data-explorer.oecd.org}{OECD Data Explorer}.
-The coefficients are the elements of a
-scaled version of the \eqn{U} matrix.
+The coefficients are a
+scaled version of the \eqn{U} matrix
+from the SVD.
 }
 \examples{
 coef_lfp(oecd_lfp_subset)

@@ -6,7 +6,7 @@
 \alias{bssvd-package}
 \title{bssvd: Make Scaled SVD Objects}
 \description{
-Based on data from international demographic databases, build objects of class "bage_ssvd", to be used with package 'bage'. 'bssvd' is a developer-focused package, and would not normally be used directly for data analysis.
+Build objects holding data on age profiles for demographic processes such as fertility, mortality, and labour force participation. The objects are constructed by performing singular value decompositions on data from international demographic databasaes. Package 'bssvd' is designed to support package 'bage'. It is developer-focused, and would not normally be used directly for data analysis.
 }
 \seealso{
 Useful links:

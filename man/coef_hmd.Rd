@@ -19,16 +19,11 @@ A tibble
 }
 \description{
 Obtain time series of coefficients from a
-scaled SVD of
-\href{https://www.mortality.org/Data/ZippedDataFiles}{Human Mortality Database}
-data.
-}
-\details{
-Obtain a scaled version of the \eqn{U} matrix,
-produced as part of the SVD of log
-mortality rates from the HMD.
-The mortality rates are for single years of age
-up to age 110+.
+scaled SVD of data from the
+\href{https://www.mortality.org/Data/ZippedDataFiles}{Human Mortality Database}.
+The coefficients are a
+scaled version of the \eqn{U} matrix
+from the SVD.
 }
 \examples{
 zipfile <- system.file("extdata", "hmd_statistics_subset.zip",

@@ -1,4 +1,8 @@
 
+# bssvd 0.2.1
+
+* Tidied documentation and tests
+
 # bssvd 0.2.0
 
 * Added functions `coef_hfd()`, `coef_hmd()`, and `coef_lfp()`

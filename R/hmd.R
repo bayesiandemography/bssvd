@@ -3,15 +3,11 @@
 #' Obtain Coefficients from Scaled SVD of HMD Data
 #'
 #' Obtain time series of coefficients from a
-#' scaled SVD of 
-#' [Human Mortality Database](https://www.mortality.org/Data/ZippedDataFiles)
-#' data.
-#' 
-#' Obtain a scaled version of the \eqn{U} matrix,
-#' produced as part of the SVD of log
-#' mortality rates from the HMD.
-#' The mortality rates are for single years of age
-#' up to age 110+. 
+#' scaled SVD of data from the
+#' [Human Mortality Database](https://www.mortality.org/Data/ZippedDataFiles).
+#' The coefficients are a 
+#' scaled version of the \eqn{U} matrix
+#' from the SVD.
 #'
 #' @param zipfile The name of a zipped file downloaded
 #' from the Human Mortality Database.
@@ -55,7 +51,8 @@ coef_hmd <- function(zipfile, n_comp = 5) {
 #'
 #' Process data on age-specific mortality rates
 #' from a zipped file downloaded from the
-#' [Human Mortality Database](https://www.mortality.org/Data/ZippedDataFiles).
+#' [Human Mortality Database](https://www.mortality.org/Data/ZippedDataFiles)
+#' so that it is ready to created a scaled SVD.
 #'
 #' @section Usage:
 #' **Step 1: Download data**
@@ -67,7 +64,7 @@ coef_hmd <- function(zipfile, n_comp = 5) {
 #'
 #' https://www.mortality.org/File/Download/hmd.v6/zip/all_hmd/hmd_statistics_20240226.zip
 #'
-#' **Step 2: Call function 'data_ssvd_hmd'**
+#' **Step 2: Call function `data_ssvd_hmd()`**
 #'
 #' Put the file into the working directory, and supply the name of the file
 #' to function `data_ssvd_hmd()`, eg
@@ -77,8 +74,7 @@ coef_hmd <- function(zipfile, n_comp = 5) {
 #'
 #' @inheritParams coef_hmd
 #'
-#' @returns A tibble with the format required by
-#' `bage::ssvd()`.
+#' @returns A tibble
 #'
 #' @seealso
 #' - [data_ssvd_hfd()] Prepare data on fertility
@@ -193,9 +189,10 @@ hmd_calculate_coef <- function(data, n_comp) {
                 rows = "age",
                 cols = c("country", "time"),
                 measure = "mx")
-  country_time <- lapply(ans, colnames)
+  ans <- lapply(ans, remove_cols_with_na, n_comp = n_comp)
   ans <- lapply(ans, replace_zeros)
   ans <- lapply(ans, log)
+  country_time <- lapply(ans, colnames)
   ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
   ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
   for (i in seq_along(ans)) {

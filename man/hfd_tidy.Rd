@@ -13,7 +13,7 @@ hfd_tidy(data)
 A tibble.
 }
 \description{
-Tidy data frame containing data from
+Tidy a data frame containing data from
 the ASFR row of the "By statistic" table of
 \href{https://www.humanfertility.org/Data/ZippedDataFiles}{ZippedDataFiles}.
 }
