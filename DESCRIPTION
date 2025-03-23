@@ -23,7 +23,7 @@ Depends:
 Imports:
     cli,
     Matrix,
-    poputils (>= 0.3.3),
+    poputils (>= 0.4.0),
     tibble,
     vctrs (>= 0.0.7)
 Suggests:
