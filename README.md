@@ -13,7 +13,7 @@ coverage](https://codecov.io/gh/bayesiandemography/bssvd/graph/badge.svg)](https
 <!-- badges: end -->
 
 Use data from international demographic databases to create objects that
-capture regularities in demographic rates.
+describe regularities in demographic rates.
 
 **bssvd** supports package
 [bage](https://github.com/bayesiandemography/bage), and is not intended

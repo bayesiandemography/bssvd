@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/bayesiandemography/bssvd/graph/badge.svg)](https://app.codecov.io/gh/bayesiandemography/bssvd)
 <!-- badges: end -->
 
-Use data from international demographic databases to create objects that capture regularities in demographic rates.
+Use data from international demographic databases to create objects that describe regularities in demographic rates.
 
 **bssvd** supports package [bage](https://github.com/bayesiandemography/bage), and is not intended to be used directly for data analysis.
 
