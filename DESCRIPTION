@@ -27,7 +27,6 @@ Imports:
     tibble,
     vctrs (>= 0.0.7)
 Suggests:
-    rsdmx,
     testthat (>= 3.0.0),
     utils
 Config/testthat/edition: 3
