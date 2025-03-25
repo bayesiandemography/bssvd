@@ -28,7 +28,9 @@
 #' @examples
 #' zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
 #'                        package = "bssvd")
-#' coef_hmd(zipfile)
+#' if (file.exists(zipfile)) {
+#'   coef_hmd(zipfile)
+#' }
 #' @export
 coef_hmd <- function(zipfile, n_comp = 5) {
   check_n(n = n_comp,

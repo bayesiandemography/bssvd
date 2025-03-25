@@ -20,4 +20,4 @@ jobs:
         run: |
           Rscript -e 'covr::codecov()'
         env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}	  
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
