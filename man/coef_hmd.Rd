@@ -26,10 +26,13 @@ scaled version of the \eqn{U} matrix
 from the SVD.
 }
 \examples{
-zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
-                       package = "bssvd")
-if (file.exists(zipfile)) {
-  coef_hmd(zipfile)
+if (requireNamespace("bssvd", quietly = TRUE)) {
+  zipfile <- system.file("extdata",
+                         "hmd_statistics_subset.zip",
+                         package = "bssvd")
+  if (nzchar(zipfile) && file.exists(zipfile)) {
+    coef_hmd(zipfile)
+  }
 }
 }
 \seealso{

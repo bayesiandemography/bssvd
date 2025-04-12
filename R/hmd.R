@@ -26,10 +26,13 @@
 #'   for OECD Labor Force Participation data
 #'
 #' @examples
-#' zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
-#'                        package = "bssvd")
-#' if (file.exists(zipfile)) {
-#'   coef_hmd(zipfile)
+#' if (requireNamespace("bssvd", quietly = TRUE)) {
+#'   zipfile <- system.file("extdata",
+#'                          "hmd_statistics_subset.zip",
+#'                          package = "bssvd")
+#'   if (nzchar(zipfile) && file.exists(zipfile)) {
+#'     coef_hmd(zipfile)
+#'   }
 #' }
 #' @export
 coef_hmd <- function(zipfile, n_comp = 5) {
@@ -411,8 +414,9 @@ hmd_unzip <- function(zipfile) {
             "lt_female/fltper_5x1",
             "lt_male/mltper_1x1",
             "lt_male/mltper_5x1")
-  tmp_dir <- tempdir()
-  on.exit(unlink(tmp_dir, recursive = TRUE))
+  ## tmp_dir <- tempdir()
+  tmp_dir <- file.path(getwd(), "tmp_unzip")
+  dir.create(tmp_dir, showWarnings = FALSE)
   utils::unzip(zipfile, exdir = tmp_dir)
   get_data <- function(dir) {
     country_code <- sub("([A-Z]+)\\..*", "\\1", list.files(dir))
@@ -436,8 +440,7 @@ hmd_unzip <- function(zipfile) {
       x
     }
     ans <- .mapply(add_nm,
-                   dots = list(x = ans,
-                               nm = country_code),
+                   dots = list(x = ans, nm = country_code),
                    MoreArgs = list())
     ans <- do.call(rbind, ans)
     ans$sex <- sex
@@ -458,6 +461,7 @@ hmd_unzip <- function(zipfile) {
   }
   ans <- lapply(dirs_unpacked, get_data)
   ans <- do.call(rbind, ans)
+  on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
   ans
 }
 
