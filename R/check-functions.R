@@ -75,3 +75,23 @@ check_numeric <- function(x, nm_x) {
     cli::cli_abort("{.arg {nm_x}} has non-finite value.")
   invisible(TRUE)
 }
+
+## HAS_TESTS
+#' Check that 'year_min is Valid
+#'
+#' @param year_min Minimum year for data
+#'
+#' @returns TRUE, invisibly
+#' 
+#' @noRd
+check_year_min <- function(year_min) {
+  if (!is.null(year_min)) {
+    check_n(n = year_min,
+            nm_n = "year_min",
+            min = 1500L,
+            max = 2050L,
+            divisible_by = 1L)
+  }
+  invisible(TRUE)
+}
+  

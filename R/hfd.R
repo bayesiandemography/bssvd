@@ -1,4 +1,6 @@
 
+## User-visible ---------------------------------------------------------------
+
 ## HAS_TESTS
 #' Obtain Coefficients from Scaled SVD of HFD Data
 #'
@@ -16,12 +18,13 @@
 #' @returns A tibble
 #'
 #' @seealso
-#' - [data_ssvd_hfd()] Prepare data on fertility
+#' - [data_ssvd_hfd()]Put data
 #'   from the Human Fertility Database
-#' - [coef_hmd()] Obtain coefficients
-#'   for Human Mortality Database data
-#' - [coef_lfp()] Obtain coefficients
-#'   for OECD Labor Force Participation data
+#'   into the format required by the
+#'   `ssvd()` function in `bage`.
+#' - [tidy_hfd()] Format data from the
+#'   Human Fertility Database into
+#'   a tidy data frame
 #'
 #' @examples
 #' coef_hfd(asfr_subset)
@@ -33,9 +36,7 @@ coef_hfd <- function(data, n_comp = 5) {
                     max = 6L,
                     divisible_by = NULL)
   n_comp <- as.integer(n_comp)
-  cli::cli_progress_message("Tidying data...")
-  data <- hfd_tidy(data)
-  cli::cli_progress_message("Calculating coefficients...")
+  data <- tidy_hfd(data)
   hfd_calculate_coef(data = data, n_comp = n_comp)
 }
 
@@ -95,11 +96,13 @@ coef_hfd <- function(data, n_comp = 5) {
 #' @returns A tibble
 #'
 #' @seealso
-#' - [data_ssvd_hmd()] Prepare data on age-specific mortality
-#'   from the Human Mortality Database
-#' - [data_ssvd_lfp()] Prepare data on labour force participation
-#'   from the OCED
-#'
+#' - [coef_hfd()] Obtain time series
+#'   of coefficients
+#'   from Human Fertility Database data
+#' - [tidy_hfd()] Format data from the
+#'   Human Fertility Database into
+#'   a tidy data frame
+#' 
 #' @examples
 #' data <- data_ssvd_hfd(asfr_subset)
 #' data
@@ -124,7 +127,7 @@ data_ssvd_hfd <- function(data,
                     max = 6L,
                     divisible_by = NULL)
   cli::cli_progress_message("Tidying data...")
-  data <- hfd_tidy(data)
+  data <- tidy_hfd(data)
   labels_age <- hfd_make_labels_age(data = data,
                                     age_min_max = age_min_max,
                                     age_max_min = age_max_min)
@@ -136,9 +139,50 @@ data_ssvd_hfd <- function(data,
 
 
 ## HAS_TESTS
+#' Tidy HFD Age-Specific Fertility Data
+#'
+#' Tidy a data frame containing data from
+#' the ASFR row of the "By statistic" table of
+#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
+#'
+#' @param data A data frame
+#'
+#' @returns A tibble.
+#'
+#' @seealso
+#' - [data_ssvd_hfd()]Put data
+#'   from the Human Fertility Database
+#'   into the format required by the
+#'   `ssvd()` function in `bage`.
+#' - [coef_hfd()] Obtain time series
+#'   of coefficients
+#'   from Human Fertility Database data
+#'
+#' @examples
+#' tidy_hfd(asfr_subset)
+#' @export
+tidy_hfd <- function(data) {
+  nms_required <- c("Code", "Year", "Age", "ASFR")
+  nms_obtained <- names(data)
+  for (nm in nms_required)
+    if (!(nm %in% nms_obtained))
+      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
+  ans <- data[nms_required]
+  names(ans) <- c("country", "time", "age", "value")
+  ans$age <- sub("^([0-9]+)-$", "\\1", ans$age)
+  ans$age <- sub("^([0-9]+)\\+$", "\\1", ans$age)
+  ans$age <- as.integer(ans$age)
+  ans <- tibble::tibble(ans)
+  ans
+}
+
+
+## Internal -------------------------------------------------------------------
+
+## HAS_TESTS
 #' Obtain the Scaled 'U' Matrix From an SVD of HFD Data
 #'
-#' @param data A data frame, typically produced by 'hfd_tidy'.
+#' @param data A data frame, typically produced by 'tidy_hfd'.
 #' @param n_comp Number of components.
 #'
 #' @returns A tibble
@@ -258,41 +302,6 @@ hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
 }
 
 
-
-## HAS_TESTS
-#' Tidy HFD Age-Specific Fertility Data
-#'
-#' Tidy a data frame containing data from
-#' the ASFR row of the "By statistic" table of
-#' [ZippedDataFiles](https://www.humanfertility.org/Data/ZippedDataFiles).
-#'
-#' @param data A data frame
-#'
-#' @returns A tibble.
-#'
-#' @seealso
-#' - [data_ssvd_hmd()] Prepare data on mortality
-#'   from Human Mortality Database
-#' - [data_ssvd_lfp()] Prepare data on labour force participation
-#'   from the OCED
-#'
-#' @examples
-#' hfd_tidy(asfr_subset)
-#' @export
-hfd_tidy <- function(data) {
-  nms_required <- c("Code", "Year", "Age", "ASFR")
-  nms_obtained <- names(data)
-  for (nm in nms_required)
-    if (!(nm %in% nms_obtained))
-      cli::cli_abort("{.arg data} does not have a column called {.val {nm}}.")
-  ans <- data[nms_required]
-  names(ans) <- c("country", "time", "age", "value")
-  ans$age <- sub("^([0-9]+)-$", "\\1", ans$age)
-  ans$age <- sub("^([0-9]+)\\+$", "\\1", ans$age)
-  ans$age <- as.integer(ans$age)
-  ans <- tibble::tibble(ans)
-  ans
-}
 
 
 ## HAS_TESTS

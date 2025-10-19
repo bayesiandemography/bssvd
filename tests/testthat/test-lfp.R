@@ -20,6 +20,24 @@ test_that("'ssvd_lfp' works with valid inputs", {
 })
 
 
+## 'tidy_lfp' --------------------------------------------------------
+
+test_that("'tidy_lfp' works with valid inputs - no year_min", {
+  ans <- tidy_lfp(oecd_lfp_subset)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+})
+
+test_that("'tidy_lfp' works with valid inputs - has year_min", {
+  ans <- tidy_lfp(oecd_lfp_subset, year_min = 2011)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+  expect_true(all(ans$time >= 2011))
+})
+
+
 ## 'lfp_calculate_coef' -------------------------------------------------------
 
 test_that("'lfp_calculate_coef' works with valid inputs", {
@@ -113,26 +131,17 @@ test_that("'lfp_make_labels_age' works", {
 })
 
 
-## 'lfp_tidy' --------------------------------------------------------
-
-test_that("'lfp_tidy' works with valid inputs", {
-  ans <- lfp_tidy(oecd_lfp_subset)
-  expect_setequal(names(ans),
-                  c("country", "sex", "age", "time", "value"))
-  expect_true(tibble::is_tibble(ans))
-})
-
-test_that("'lfp_tidy' throws correct error when variable missing", {
+test_that("'tidy_lfp' throws correct error when variable missing", {
   data <- oecd_lfp_subset
   data <- data[-match("REF_AREA", names(data))]
-  expect_error(lfp_tidy(data),
+  expect_error(tidy_lfp(data),
                "`data` does not have a column called \"REF_AREA\"")
 })
 
-test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
+test_that("'tidy_lfp' throws correct error when data has invalid sex label", {
   data <- oecd_lfp_subset
   data$SEX[3] <- "wrong"
-  expect_error(lfp_tidy(data),
+  expect_error(tidy_lfp(data),
                "Invalid value for `sex`: \"wrong\"")
 })
 

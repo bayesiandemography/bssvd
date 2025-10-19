@@ -50,3 +50,22 @@
 #' page of the Human Fertility Database.
 #' Accessed 12 April 2024.
 "asfr_subset"
+
+
+#' Country Codes
+#'
+#' Three-digit country codes, and
+#' country names,
+#' from UN_M49 standard.
+#'
+#' @format
+#' A tibble with 190 rows and with
+#' columns `country` and `code`.
+#'
+#' @source United Nations Statistics Division. (2024).
+#' Standard country or area codes for statistical
+#' use (M49). United Nations, Department of Economic
+#' and Social Affairs. Retrieved from
+#' https://unstats.un.org/unsd/methodology/m49/
+#' on 13 October 2025.
+"country_code"

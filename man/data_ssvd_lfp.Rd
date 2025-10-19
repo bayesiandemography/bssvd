@@ -4,7 +4,7 @@
 \alias{data_ssvd_lfp}
 \title{Prepare OECD Data on Labour Force Participation Rates}
 \usage{
-data_ssvd_lfp(data, age_max = 75, n_comp = 5)
+data_ssvd_lfp(data, age_max = 75, n_comp = 5, year_min = NULL)
 }
 \arguments{
 \item{data}{A data frame containing OECD data.}
@@ -14,6 +14,10 @@ oldest closed age group. Default is \code{75}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{year_min}{Only include data for
+\code{year_min} onwards. Ignored if
+\code{year_min} is \code{NULL} (the default).}
 }
 \value{
 A tibble
@@ -48,9 +52,10 @@ data
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on fertility
-from the Human Fertility Database
-\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on mortality
-from the Human Mortality Database
+\item \code{\link[=tidy_lfp]{tidy_lfp()}} Format OECD labour force
+participation data into a tidy data frame.
+\item \code{\link[=coef_lfp]{coef_lfp()}} Obtain time series
+of coefficients for OECD labour force
+participation data
 }
 }

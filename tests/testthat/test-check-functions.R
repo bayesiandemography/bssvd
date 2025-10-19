@@ -61,7 +61,7 @@ test_that("'check_n' throws correct error when not divisible by 'divisible_by'",
 
 
 
-## 'check_numeric' ------------------------------------------------------------------
+## 'check_numeric' ------------------------------------------------------------
 
 test_that("'check_numeric' returns TRUE with valid inputs", {
     expect_true(check_numeric(x = 1:4, nm_x = "x"))
@@ -86,4 +86,15 @@ test_that("'check_numeric' throws correct error with NA", {
 test_that("'check_numeric' throws correct error with Inf", {
     expect_error(check_numeric(x = c(100, -1, Inf), nm_x = "x"),
                  "`x` has non-finite value.")
+})
+
+
+## 'check_year_min' -----------------------------------------------------------
+
+test_that("'check_year_min' returns TRUE with NULL", {
+  expect_true(check_year_min(NULL))
+})
+
+test_that("'check_year_min' returns TRUE with valid year", {
+  expect_true(check_year_min(2000))
 })

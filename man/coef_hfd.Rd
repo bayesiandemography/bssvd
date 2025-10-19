@@ -28,11 +28,12 @@ coef_hfd(asfr_subset)
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on fertility
+\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}}Put data
 from the Human Fertility Database
-\item \code{\link[=coef_hmd]{coef_hmd()}} Obtain coefficients
-for Human Mortality Database data
-\item \code{\link[=coef_lfp]{coef_lfp()}} Obtain coefficients
-for OECD Labor Force Participation data
+into the format required by the
+\code{ssvd()} function in \code{bage}.
+\item \code{\link[=tidy_hfd]{tidy_hfd()}} Format data from the
+Human Fertility Database into
+a tidy data frame
 }
 }

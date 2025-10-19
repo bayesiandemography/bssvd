@@ -3,6 +3,7 @@
 .PHONY: all
 all: ../data/asfr_subset.rda \
      ../data/oecd_lfp_subset.rda \
+     ../data/country_code.rda \
      documentation
 
 
@@ -11,6 +12,9 @@ all: ../data/asfr_subset.rda \
 	Rscript $^ $@
 
 ../data/oecd_lfp_subset.rda: lfp/oecd_lfp_subset.R
+	Rscript $^ $@
+
+../data/country_code.rda: codes/country_code.R
 	Rscript $^ $@
 
 

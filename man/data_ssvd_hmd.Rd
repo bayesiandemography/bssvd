@@ -4,7 +4,12 @@
 \alias{data_ssvd_hmd}
 \title{Prepare Data from Human Mortality Database}
 \usage{
-data_ssvd_hmd(zipfile, n_comp = 5)
+data_ssvd_hmd(
+  zipfile,
+  n_comp = 5,
+  date = c("2025-09-25", "2024-02-26"),
+  year_min = NULL
+)
 }
 \arguments{
 \item{zipfile}{The name of a zipped file downloaded
@@ -13,6 +18,10 @@ A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{year_min}{Only include data for
+\code{year_min} onwards. Ignored if
+\code{year_min} is \code{NULL} (the default).}
 }
 \value{
 A tibble
@@ -51,9 +60,11 @@ data
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare data on fertility
-from the Human Fertility Database
-\item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Prepare data on labour force participation
-from the OCED
+\item \code{\link[=coef_hfd]{coef_hfd()}} Obtain time series
+of coefficients
+for Human Mortality Database data
+\item \code{\link[=tidy_hmd]{tidy_hmd()}} Format data from the
+Human Mortality Database into
+a tidy data frame
 }
 }

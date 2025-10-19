@@ -129,10 +129,10 @@ test_that("'hfd_make_labels_age' works - thows appropriate error when is factor"
 })
 
 
-## 'hfd_tidy' -----------------------------------------------------------------
+## 'tidy_hfd' -----------------------------------------------------------------
 
-test_that("'hfd_tidy' works with valid inputs", {
-  ans <- hfd_tidy(asfr_subset)
+test_that("'tidy_hfd' works with valid inputs", {
+  ans <- tidy_hfd(asfr_subset)
   expect_setequal(names(ans),
                   c("country", "age", "time", "value"))
   expect_true(tibble::is_tibble(ans))
@@ -140,10 +140,10 @@ test_that("'hfd_tidy' works with valid inputs", {
   expect_identical(max(ans$age), 55L)
 })
 
-test_that("'hfd_tidy' throws correct error when variable missing", {
+test_that("'tidy_hfd' throws correct error when variable missing", {
   data <- asfr_subset
   data <- data[-match("Age", names(data))]
-  expect_error(hfd_tidy(data),
+  expect_error(tidy_hfd(data),
                "`data` does not have a column called \"Age\"")
 })
 

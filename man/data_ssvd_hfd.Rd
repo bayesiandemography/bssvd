@@ -73,9 +73,11 @@ data
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on age-specific mortality
-from the Human Mortality Database
-\item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Prepare data on labour force participation
-from the OCED
+\item \code{\link[=coef_hfd]{coef_hfd()}} Obtain time series
+of coefficients
+from Human Fertility Database data
+\item \code{\link[=tidy_hfd]{tidy_hfd()}} Format data from the
+Human Fertility Database into
+a tidy data frame
 }
 }

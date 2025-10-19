@@ -196,15 +196,16 @@ remove_cols_with_na <- function(x, n_comp) {
 #'
 #' @noRd
 replace_zeros <- function(x) {
-    is_zero <- x == 0
-    if (any(is_zero)) {
-        row_means <- rowMeans(x)
-        col_sums <- colSums(x)
-        standardized_row_means <- proportions(row_means) 
-        predicted <- outer(standardized_row_means, col_sums)
-        x[is_zero] <- 0.5 * predicted[is_zero]
-    }
-    x
+  eps <- 1e-12
+  is_zero <- x < eps
+  if (any(is_zero)) {
+    row_means <- rowMeans(x)
+    col_sums <- colSums(x)
+    standardized_row_means <- proportions(row_means) 
+    predicted <- outer(standardized_row_means, col_sums)
+    x[is_zero] <- pmax(0.5 * predicted[is_zero], eps)
+  }
+  x
 }
 
 
@@ -220,7 +221,7 @@ replace_zeros <- function(x) {
 #'
 #' Assume that \code{x} is a valid numeric
 #' matrix of rates with no NAs, no negative values,
-#' and no values abouve one.
+#' and no values above one.
 #'
 #' @param x A matrix of probabilities.
 #'
@@ -229,17 +230,18 @@ replace_zeros <- function(x) {
 #'
 #' @noRd
 replace_zeros_ones <- function(x) {
-    is_zero <- x == 0
-    is_one <- x == 1
-    if (any(is_zero) || any(is_one)) {
-        row_means <- rowMeans(x)
-        col_sums <- colSums(x)
-        standardized_row_means <- proportions(row_means) 
-        predicted <- outer(standardized_row_means, col_sums)
-        x[is_zero] <- 0.5 * predicted[is_zero]
-        x[is_one] <- 0.5 + 0.5 * predicted[is_one]
-    }
-    x
+  eps <- 1e-12
+  is_zero <- x < eps
+  is_one <- x > (1 - eps)
+  if (any(is_zero) || any(is_one)) {
+    row_means <- rowMeans(x)
+    col_sums <- colSums(x)
+    standardized_row_means <- proportions(row_means) 
+    predicted <- outer(standardized_row_means, col_sums)
+    x[is_zero] <- pmax(0.5 * predicted[is_zero], eps)
+    x[is_one] <- pmin(0.5 + 0.5 * predicted[is_one], 1 - eps)
+  }
+  x
 }
 
 
@@ -253,11 +255,12 @@ replace_zeros_ones <- function(x) {
 #'
 #' @noRd
 trim_01 <- function(x) {
+  eps <- 1e-12
   is_obs <- !is.na(x)
   if (!any(is_obs))
     return(x)
-  is_too_low <- x <= 0
-  is_too_high <- x >= 1
+  is_too_low <- x < eps
+  is_too_high <- x >= (1 - eps)
   is_valid <- is_obs & !is_too_low & !is_too_high
   need_to_trunc_but_cannot <- any(is_obs) && !any(is_valid)
   if (need_to_trunc_but_cannot) {
@@ -267,8 +270,8 @@ trim_01 <- function(x) {
                                "but no values inside the interval.")))
   }
   valid <- x[is_valid]
-  min <- min(valid)
-  max <- max(valid)
+  min <- max(min(valid), eps)
+  max <- min(max(valid), 1 - eps)
   is_increase <- is_obs & is_too_low
   is_reduce <- is_obs & is_too_high
   x[is_increase] <- min
