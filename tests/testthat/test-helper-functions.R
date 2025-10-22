@@ -11,6 +11,54 @@ test_that("'get_ages_max' works", {
 })
 
 
+## 'make_indep' ---------------------------------------------------------------
+
+test_that("'make_indep' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = c(poputils::age_labels(type = "five",
+                                                   min = 15,
+                                                   max = 65,
+                                                   open = TRUE),
+                              "60+"),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  labels_age <- lfp_make_labels_age(data = data, age_max = 65)
+  ans_obtained <- make_indep(data, labels_age = labels_age, n_comp = 5)
+  expect_setequal(names(ans_obtained),
+                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
+  expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
+  expect_identical(rownames(ans_obtained$matrix[[1]]),
+                   paste(ans_obtained$labels_sexgender[[1]],
+                         ans_obtained$labels_age[[1]],
+                         sep = "."))
+})
+
+
+## 'make_joint' ---------------------------------------------------------------
+
+test_that("'lfp_joint' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = c(poputils::age_labels(type = "five",
+                                                 min = 15,
+                                                 max = 65,
+                                                 open = TRUE),
+                              "60+"),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  labels_age <- lfp_make_labels_age(data = data, age_max = 65)
+  ans_obtained <- make_joint(data, labels_age = labels_age, n_comp = 5)
+  expect_setequal(names(ans_obtained),
+                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
+  expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
+  expect_identical(rownames(ans_obtained$matrix[[1]]),
+                   paste(ans_obtained$labels_sexgender[[1]],
+                         ans_obtained$labels_age[[1]],
+                         sep = "."))
+})
+
+
 ## 'make_matrix_and_offset' ---------------------------------------------------
 
 test_that("'make_matrix_and_offset' performs correctly with valid inputs - log", {

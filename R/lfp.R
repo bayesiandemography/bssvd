@@ -272,7 +272,7 @@ lfp_get_data_one <- function(data, labels_age) {
   ans <- data[data$age %in% labels_age, ]
   ans$age <- factor(ans$age, levels = labels_age)
   ord <- order(ans$age)
-  ans <- ans[ord, ]
+  ans <- ans[ord, , drop = FALSE]
   rownames(ans) <- NULL
   ans
 }
@@ -289,48 +289,9 @@ lfp_get_data_one <- function(data, labels_age) {
 #' 
 #' @noRd
 lfp_indep <- function(data, labels_age, n_comp) {
-  data <- data[data$sex %in% c("Female", "Male"), ]
-  data$sex <- poputils::reformat_sex(data$sex)
-  data_split <- .mapply(lfp_get_data_one,
-                        dots = list(labels_age = labels_age),
-                        MoreArgs = list(data = data))
-  data_split <- lapply(data_split,
-                       function(x) split(x[c("country", "time", "age", "value")], x["sex"]))
-  x_split <- lapply(data_split,
-                    function(x)
-                      .mapply(poputils::to_matrix,
-                              dots = list(x = x),
-                              MoreArgs = list(rows = "age",
-                                              cols = c("country", "time"),
-                                              measure = "value")))
-  x_split <- lapply(x_split,
-                    function(x_one_age_max)
-                      lapply(x_one_age_max, remove_cols_with_na, n_comp = n_comp))
-  ssvd_split <- lapply(x_split,
-                       function(x_one_age_max)
-                         lapply(x_one_age_max,
-                                make_matrix_and_offset,
-                                transform = "logit",
-                                n_comp = n_comp))
-  n_age <- lengths(labels_age)
-  labels_sexgender <- .mapply(rep,
-                              dots = list(each = n_age),
-                              MoreArgs = list(x = c("Female", "Male")))
-  labels_age <- lapply(labels_age, rep.int, times = 2L)
-  matrix <- lapply(ssvd_split, function(x) lapply(x, function(y) y$matrix))
-  offset <- lapply(ssvd_split, function(x) lapply(x, function(y) y$offset))
-  matrix <- lapply(matrix, Matrix::.bdiag)
-  offset <- lapply(offset, function(x) vctrs::vec_c(!!!x))
-  for (i in seq_along(offset)) {
-    nms <- paste(labels_sexgender[[i]], labels_age[[i]], sep = ".")
-    names(offset[[i]]) <- nms
-    rownames(matrix[[i]]) <- nms
-  }
-  tibble::tibble(type = "indep",
-                 labels_age = labels_age,
-                 labels_sexgender = labels_sexgender,
-                 matrix = matrix,
-                 offset = offset)
+  make_indep(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp)
 }
 
 
@@ -345,35 +306,9 @@ lfp_indep <- function(data, labels_age, n_comp) {
 #'
 #' @noRd
 lfp_joint <- function(data, labels_age, n_comp) {
-  data <- data[data$sex %in% c("Female", "Male"), ]
-  data$sex <- poputils::reformat_sex(data$sex)
-  data_split <- .mapply(lfp_get_data_one,
-                        dots = list(labels_age = labels_age),
-                        MoreArgs = list(data = data))
-  order_sexage <- function(x) x[order(x$sex, x$age), ]
-  data_split <- lapply(data_split, order_sexage)
-  x_split <- .mapply(poputils::to_matrix,
-                     dots = list(x = data_split),
-                     MoreArgs = list(rows = c("sex", "age"),
-                                     cols = c("country", "time"),
-                                     measure = "value"))
-  x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
-  ssvd_split <- lapply(x_split,
-                       make_matrix_and_offset,
-                       transform = "logit",
-                       n_comp = n_comp)
-  n_age <- lengths(labels_age)
-  labels_age <- lapply(labels_age, rep, times = 2L)
-  labels_sexgender <- .mapply(rep,
-                              dots = list(each = n_age),
-                              MoreArgs = list(x = c("Female", "Male")))
-  matrix <- lapply(ssvd_split, function(x) x$matrix)
-  offset <- lapply(ssvd_split, function(x) x$offset)
-  tibble::tibble(type = "joint",
-                 labels_age = labels_age,
-                 labels_sexgender = labels_sexgender,
-                 matrix = matrix,
-                 offset = offset)
+  make_joint(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp)
 }
 
 

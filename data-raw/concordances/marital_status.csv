@@ -1,0 +1,36 @@
+marital_status,currently_married,ever_married
+Married,TRUE,TRUE
+Single,FALSE,FALSE
+Widowed,FALSE,TRUE
+Never married,FALSE,FALSE
+Divorced,FALSE,TRUE
+Married or in consensual union,TRUE,TRUE
+Consensual union,TRUE,TRUE
+Married or married but separated,NA,TRUE
+Living together,TRUE,TRUE
+Married or Living together,TRUE,TRUE
+Separated,FALSE,TRUE
+Ever married,NA,TRUE
+Currently not married,FALSE,NA
+Not living together,NA,NA
+Divorced or Separated,FALSE,TRUE
+"Married, in consensual unions or separated",NA,TRUE
+Widowed or divorced,FALSE,TRUE
+Married monogamous,TRUE,TRUE
+"Consensual union, not living together",TRUE,TRUE
+Currently not married nor in consensual union,FALSE,NA
+Married spouse present,TRUE,TRUE
+Divorced or Separated or Widowed,FALSE,TRUE
+Single or in consensual unions,NA,NA
+"Widowed, divorced or separated",FALSE,TRUE
+Visiting partner,TRUE,TRUE
+Not in union,FALSE,NA
+Widowed or separated,FALSE,TRUE
+Divorced or Widowed,FALSE,TRUE
+Married polygamous,TRUE,TRUE
+Registred partnership,TRUE,TRUE
+Separated from consensual union,FALSE,TRUE
+Married spouse absent,TRUE,TRUE
+Marriage contract,TRUE,TRUE
+Separated from marriage,FALSE,TRUE
+Married gaunna not performed,TRUE,TRUE
