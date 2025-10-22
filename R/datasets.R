@@ -69,3 +69,23 @@
 #' https://unstats.un.org/unsd/methodology/m49/
 #' on 13 October 2025.
 "country_code"
+
+
+#' Marital Status
+#'
+#' Mapping between reported marital statuses
+#' reported in the World Marriage Data database
+#' and variables 'currently_married' and 'ever_married'.
+#'
+#' @format
+#' A tibble with 35 rows and with
+#' columns `marital_status` and `currently_married`,
+#' and `ever_married`.
+#'
+#' @source Marital statuses derived from data in
+#' file `undesa_pd_2019_wmd_marital_status.xlsx`
+#' downloaded from the United Nations Population Division
+#' website https://www.un.org/development/desa/pd/data/world-marriage-data
+#' on 10 October 2025.
+"marital_status"
+

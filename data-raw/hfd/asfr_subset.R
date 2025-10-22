@@ -1,7 +1,9 @@
 
-library(readr)
-library(dplyr, warn.conflicts = FALSE)
-library(command)
+suppressPackageStartupMessages({
+  library(readr)
+  library(dplyr)
+  library(command)
+})
 
 cmd_assign(.asfr = "hfd/asfrRR.txt.zip",
            .out = "../data/asfr_subset.rda")
