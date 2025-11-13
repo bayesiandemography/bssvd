@@ -28,6 +28,7 @@ Imports:
     tibble,
     vctrs (>= 0.0.7)
 Suggests:
+    bage,
     rsdmx,
     testthat (>= 3.0.0),
     utils

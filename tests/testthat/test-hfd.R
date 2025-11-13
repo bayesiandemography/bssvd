@@ -14,6 +14,9 @@ test_that("'coef_hfd' works with valid inputs", {
 test_that("'data_ssvd_hfd' works with valid inputs", {
   suppressMessages(ans <- data_ssvd_hfd(asfr_subset, age_max = 50))
   expect_true(tibble::is_tibble(ans))
+  ans$version <- "v1"
+  s <- bage::ssvd(ans)
+  expect_s3_class(s, "bage_ssvd")
 })
 
 
@@ -24,7 +27,7 @@ test_that("'hfd_calculate_coef' works with valid inputs", {
                       age = 15:54,
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
-  ans <- hfd_calculate_coef(data, n_comp = 5)
+  ans <- hfd_calculate_coef(data, n_comp = 5, eps = 0.00001)
   expect_setequal(names(ans), c("country", "time", "component", "coef"))
 })
 
@@ -59,7 +62,6 @@ test_that("'hfd_get_data_one' throws appropriate error with open age group", {
                                 labels_age = labels_age),
                "Internal error: Age labels include open age group.")
 })
-
 
 
 ## 'hfd_make_labels_age' ------------------------------------------------------
@@ -158,7 +160,8 @@ test_that("'hfd_total' works with valid inputs", {
   labels_age <- hfd_make_labels_age(data = data,
                                     age_min_max = 15,
                                     age_max_min = 45)
-  ans_obtained <- hfd_total(data, labels_age = labels_age, n_comp = 5)
+  ans_obtained <- hfd_total(data, labels_age = labels_age, n_comp = 5,
+                            eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))

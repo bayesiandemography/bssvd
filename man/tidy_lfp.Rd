@@ -30,11 +30,11 @@ tidy_lfp(oecd_lfp_subset)
 \item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Put OECD labour
 force participation data
 into the format required by
-the \code{ssvd()} function in \code{bage}
+the \code{ssvd()} function in \pkg{bage}
 \item \code{\link[=tidy_lfp]{tidy_lfp()}} Format OECD labour force
 participation data into a tidy data frame.
 \item \code{\link[=coef_lfp]{coef_lfp()}} Obtain time series
-of coefficients for OECD labour force
+of SVD coefficients for OECD labour force
 participation data
 }
 }

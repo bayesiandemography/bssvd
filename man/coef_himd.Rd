@@ -8,7 +8,8 @@ coef_himd(
   zipfile,
   time_interval = 1,
   measure_type = c("rate", "prob"),
-  n_comp = 5
+  n_comp = 5,
+  eps = 1e-05
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ Default is \code{"rate"}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Parameter for truncating
+probabililities or rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -40,17 +45,33 @@ The coefficients are a
 scaled version of the \eqn{U} matrix
 from the SVD.
 }
+\section{Truncation and transformation}{
+
+
+If \code{measure_type} is \code{"prob"}, then
+reported probabilities outside \verb{(eps, 1-eps)}
+are shifted to \code{eps} or \code{1-eps}, and
+all values are logit-transformed,
+before the SVD is applied.
+
+If \code{measure_type} is \code{"rate"}, then
+reported probabilities less than \code{eps}
+are shifted to \code{eps},
+and all values are log-transformed,
+before the SVD is applied.
+}
+
 \examples{
-zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+zipfile <- system.file("extdata", "himd_20241023_subset.zip",
                        package = "bssvd")
-coef_hmd(zipfile)
+coef_himd(zipfile)
 }
 \seealso{
 \itemize{
 \item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Put data
 from the Human Internal Migration Database
 into the format required by
-the \code{ssvd()} function in \code{bage}
+the \code{ssvd()} function in \pkg{bage}
 \item \code{\link[=tidy_hmd]{tidy_hmd()}} Format data from the
 Human Internal Migration Database into
 a tidy data frame

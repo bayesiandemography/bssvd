@@ -115,7 +115,7 @@ test_that("'hmd_calculate_coef' works with valid inputs", {
                       type_age = "single",
                       age_open = 45)
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_calculate_coef(data, n_comp = 5)
+  ans_obtained <- hmd_calculate_coef(data, n_comp = 5, eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("sex", "country", "time", "component", "coef"))
   expect_equal(mean(ans_obtained$coef), 0)
@@ -139,7 +139,7 @@ test_that("'hmd_indep' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_indep(data, n_comp = 5)
+  ans_obtained <- hmd_indep(data, n_comp = 5, eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
@@ -168,7 +168,7 @@ test_that("'hmd_joint' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_joint(data, n_comp = 10)
+  ans_obtained <- hmd_joint(data, n_comp = 10, eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
@@ -238,7 +238,7 @@ test_that("'hmd_total' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_total(data, n_comp = 6)
+  ans_obtained <- hmd_total(data, n_comp = 6, eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))

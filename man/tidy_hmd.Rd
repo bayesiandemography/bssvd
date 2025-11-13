@@ -11,6 +11,10 @@ tidy_hmd(zipfile, date = c("2025-09-25", "2024-02-26"), year_min = NULL)
 from the Human Mortality Database.
 A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 
+\item{date}{Date on which data produced.
+Choices are \code{"2025-09-25"}, \code{"2024-02-26"}.
+(Class is character, not Date.)}
+
 \item{year_min}{Only include data for
 \code{year_min} onwards. Ignored if
 \code{year_min} is \code{NULL} (the default).}
@@ -25,7 +29,7 @@ from a zipped file downloaded from the
 into a tidy data frame.
 }
 \examples{
-zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
                        package = "bssvd")
 tidy_hmd(zipfile)
 tidy_hmd(zipfile,
@@ -37,9 +41,9 @@ tidy_hmd(zipfile,
 \item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Put data
 from the Human Mortality Database
 into the format required by
-the \code{ssvd()} function in \code{bage}
+the \code{ssvd()} function in \pkg{bage}
 \item \code{\link[=coef_hmd]{coef_hmd()}} Obtain time series
-of coefficients
+of SVD coefficients
 for Human Mortality Database data
 }
 }

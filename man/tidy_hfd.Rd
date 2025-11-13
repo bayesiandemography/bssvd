@@ -25,9 +25,9 @@ tidy_hfd(asfr_subset)
 \item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}}Put data
 from the Human Fertility Database
 into the format required by the
-\code{ssvd()} function in \code{bage}.
+\code{ssvd()} function in \pkg{bage}.
 \item \code{\link[=coef_hfd]{coef_hfd()}} Obtain time series
-of coefficients
+of SVD coefficients
 from Human Fertility Database data
 }
 }

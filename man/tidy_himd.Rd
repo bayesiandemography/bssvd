@@ -25,7 +25,7 @@ from a zipped file downloaded from the
 into a tidy data frame.
 }
 \examples{
-zipfile <- system.file("extdata", "himd_subset.zip",
+zipfile <- system.file("extdata", "himd_20241023_subset.zip",
                        package = "bssvd")
 tidy_himd(zipfile)
 }
@@ -34,9 +34,9 @@ tidy_himd(zipfile)
 \item \code{\link[=data_ssvd_himd]{data_ssvd_himd()}} Put data
 from the Human Internal Migration Database
 into the format required by
-the \code{ssvd()} function in \code{bage}
+the \code{ssvd()} function in \pkg{bage}
 \item \code{\link[=coef_hmd]{coef_hmd()}} Obtain time series
-of coefficients
+of SVD coefficients
 for Human Internal Migration Database data
 }
 }

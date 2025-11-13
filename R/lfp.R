@@ -13,12 +13,22 @@
 #' scaled version of the \eqn{U} matrix
 #' from the SVD.
 #'
+#' @section Truncation and transformation:
+#' 
+#' Reported proportions outside `(eps, 1-eps)`
+#' are shifted to `eps` or `1-eps`, and
+#' all values are logit-transformed,
+#' before the SVD is applied.
+#'
 #' @param data A data frame containing OECD data.
 #' @param n_comp Number of SVD components
 #' to include in result. Default is `5`.
 #' @param year_min Only include data for
 #' `year_min` onwards. Ignored if
 #' `year_min` is `NULL` (the default).
+#' @param eps Parameter for truncating
+#' probabililities or rates.
+#' Default is `0.00001`.
 #'
 #' @returns A tibble
 #'
@@ -26,7 +36,7 @@
 #' - [data_ssvd_lfp()] Put OECD labour
 #'   force participation data
 #'   into the format required by
-#'   the `ssvd()` function in `bage`
+#'   the `ssvd()` function in \pkg{bage}
 #' - [tidy_lfp()] Format OECD labour force
 #'   participation data into a tidy data frame.
 #' 
@@ -35,20 +45,23 @@
 #' @export
 coef_lfp <- function(data,
                      n_comp = 5,
-                     year_min = NULL) {
+                     year_min = NULL,
+                     eps = 0.00001) {
   poputils::check_n(n = n_comp,
                     nm_n = "n_comp",
                     min = 3L,
                     max = 6L,
                     divisible_by = NULL)
   n_comp <- as.integer(n_comp)
+  check_eps(eps)
   check_year_min(year_min)
   data <- tidy_lfp(data = data,
                    year_min = year_min)
   age_labels <- poputils::age_labels(type = "five", min = 15, max = 65)
   data <- data[data$age %in% age_labels, , drop = FALSE]
   lfp_calculate_coef(data = data,
-                     n_comp = n_comp)
+                     n_comp = n_comp,
+                     eps = eps)
 }
 
 
@@ -78,6 +91,8 @@ coef_lfp <- function(data,
 #' lfp_data <- data_ssvd_lfp(data)
 #' ```
 #'
+#' @section coef_lfp Truncation and transformation
+#'
 #' @inheritParams coef_lfp
 #' @param age_max The upper limit of the
 #' oldest closed age group. Default is `75`.
@@ -88,7 +103,7 @@ coef_lfp <- function(data,
 #' - [tidy_lfp()] Format OECD labour force
 #'   participation data into a tidy data frame.
 #' - [coef_lfp()] Obtain time series
-#'   of coefficients for OECD labour force
+#'   of SVD coefficients for OECD labour force
 #'   participation data
 #' 
 #' @examples
@@ -98,7 +113,8 @@ coef_lfp <- function(data,
 data_ssvd_lfp <- function(data,
                           age_max = 75,
                           n_comp = 5,
-                          year_min = NULL) {
+                          year_min = NULL,
+                          eps = 0.00001) {
   poputils::check_n(n = age_max,
                     nm_n = "age_max",
                     min = 20L,
@@ -109,6 +125,7 @@ data_ssvd_lfp <- function(data,
                     min = 3L,
                     max = 10L,
                     divisible_by = NULL)
+  check_eps(eps)
   age_max <- as.integer(age_max)
   n_comp <- as.integer(n_comp) 
   check_year_min(year_min)
@@ -116,11 +133,20 @@ data_ssvd_lfp <- function(data,
   data <- tidy_lfp(data = data, year_min = year_min)
   labels_age <- lfp_make_labels_age(data = data, age_max = age_max)
   cli::cli_progress_message("Carrying out SVD for 'total'...")
-  total <- lfp_total(data = data, labels_age = labels_age, n_comp = n_comp)
+  total <- lfp_total(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'indep'...")
-  indep <- lfp_indep(data = data, labels_age = labels_age, n_comp = n_comp)
+  indep <- lfp_indep(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'joint'...")
-  joint <- lfp_joint(data = data, labels_age = labels_age, n_comp = n_comp)
+  joint <- lfp_joint(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Combining results...")
   data <- vctrs::vec_rbind(total, indep, joint)
   data <- tibble::as_tibble(data)
@@ -144,11 +170,11 @@ data_ssvd_lfp <- function(data,
 #' - [data_ssvd_lfp()] Put OECD labour
 #'   force participation data
 #'   into the format required by
-#'   the `ssvd()` function in `bage`
+#'   the `ssvd()` function in \pkg{bage}
 #' - [tidy_lfp()] Format OECD labour force
 #'   participation data into a tidy data frame.
 #' - [coef_lfp()] Obtain time series
-#'   of coefficients for OECD labour force
+#'   of SVD coefficients for OECD labour force
 #'   participation data
 #'
 #' @examples
@@ -207,7 +233,6 @@ tidy_lfp <- function(data,
   if (i_invalid_sex > 0L)
     cli::cli_abort(c("Invalid value for {.var sex}: {.val {ans$sex[[i_invalid_sex]]}}."))
   ans$value <- ans$value / 100
-  ans$value <- trim_01(ans$value)
   ans <- tibble::tibble(ans)
   ans
 }
@@ -215,66 +240,22 @@ tidy_lfp <- function(data,
 
 ## Internal -------------------------------------------------------------------
 
+## HAS_TESTS
 #' Obtain the Scaled 'U' Matrix From an SVD of OECD
 #' Labour Force Participation Data
 #'
 #' @param data A data frame, typically produced by 'tidy_lfp'.
 #' @param n_comp Number of components.
+#' @param eps Truncation parameter
 #'
 #' @returns A tibble
 #' 
 #' @noRd
-lfp_calculate_coef <- function(data, n_comp) {
-  data$age <- poputils::reformat_age(data$age)
-  ord <- with(data, order(sex, country, time, age))
-  data <- data[ord, , drop = FALSE]
-  data <- vctrs::vec_split(data[c("country", "time", "age", "value")], data["sex"])
-  ans <- lapply(data$val,
-                poputils::to_matrix,
-                rows = "age",
-                cols = c("country", "time"),
-                measure = "value")
-  ans <- lapply(ans, remove_cols_with_na, n_comp = n_comp)
-  ans <- lapply(ans, replace_zeros_ones)
-  ans <- lapply(ans, poputils::logit)
-  country_time <- lapply(ans, colnames)
-  ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
-  ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
-  for (i in seq_along(ans)) {
-    dimnames(ans[[i]]) <- list(country_time = country_time[[i]],
-                               component = paste("Component", seq_len(n_comp)))
-    ans[[i]] <- as.data.frame.table(ans[[i]], responseName = "coef", stringsAsFactors = FALSE)
-    ans[[i]]$sex <- data$key$sex[[i]]
-  }
-  ans <- vctrs::vec_rbind(!!!ans)
-  p <- "^(.*)\\.(.*)$"
-  ans$country <- sub(p, "\\1", ans$country_time)
-  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
-  ans <- ans[c("sex", "country", "time", "component", "coef")]
-  ans <- tibble::tibble(ans)
-  ans
-}
-
-
-## HAS_TESTS
-#' Get Data Associated with One Set of Age Labels
-#'
-#' Retrieve data, turn the age variable into a factor,
-#' and use it to sort the data.
-#'
-#' @param data A data frame
-#' @param labels_age A character vector of age labels
-#'
-#' @returns A data frame
-#'
-#' @noRd
-lfp_get_data_one <- function(data, labels_age) {
-  ans <- data[data$age %in% labels_age, ]
-  ans$age <- factor(ans$age, levels = labels_age)
-  ord <- order(ans$age)
-  ans <- ans[ord, , drop = FALSE]
-  rownames(ans) <- NULL
-  ans
+lfp_calculate_coef <- function(data, n_comp, eps) {
+  calculate_coef(data = data,
+                 n_comp = n_comp,
+                 transform = "logit",
+                 eps = eps)
 }
 
 
@@ -284,14 +265,20 @@ lfp_get_data_one <- function(data, labels_age) {
 #' @param data A data frame
 #' @param labels_age List of character vectors
 #' @param n_comp Numbers of SVD components
+#' @param eps Truncation parameter
 #'
 #' @returns A data frame
 #' 
 #' @noRd
-lfp_indep <- function(data, labels_age, n_comp) {
+lfp_indep <- function(data,
+                      labels_age,
+                      n_comp,
+                      eps) {
   make_indep(data = data,
              labels_age = labels_age,
-             n_comp = n_comp)
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
 }
 
 
@@ -300,15 +287,21 @@ lfp_indep <- function(data, labels_age, n_comp) {
 #'
 #' @param data A data frame
 #' @param labels_age List of character vectors
-#' @param n_comp Numbers of SVD components
+#' @param n_comp Number of SVD components
+#' @param eps Truncation parameter
 #'
 #' @returns A data frame
 #'
 #' @noRd
-lfp_joint <- function(data, labels_age, n_comp) {
+lfp_joint <- function(data,
+                      labels_age,
+                      n_comp,
+                      eps) {
   make_joint(data = data,
              labels_age = labels_age,
-             n_comp = n_comp)
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
 }
 
 
@@ -347,36 +340,15 @@ lfp_make_labels_age <- function(data, age_max) {
 #' @param data A data frame
 #' @param labels_age List of character vectors
 #' @param n_comp Numbers of SVD components
+#' @param eps Truncation of probabilities
 #'
 #' @returns A data frame
 #'
 #' @noRd
-lfp_total <- function(data, labels_age, n_comp) {
-  data <- data[data$sex == "Total", ]
-  data_split <- .mapply(lfp_get_data_one,
-                        dots = list(labels_age = labels_age),
-                        MoreArgs = list(data = data))
-  x_split <- .mapply(poputils::to_matrix,
-                     dots = list(x = data_split),
-                     MoreArgs = list(rows = "age",
-                                     cols = c("country", "time"),
-                                     measure = "value"))
-  x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
-  ssvd_split <- lapply(x_split,
-                       make_matrix_and_offset,
-                       transform = "logit",
-                       n_comp = n_comp)
-  matrix <- lapply(ssvd_split, function(x) x$matrix)
-  offset <- lapply(ssvd_split, function(x) x$offset)
-  tibble::tibble(type = "total",
-                 labels_age = labels_age,
-                 labels_sexgender = list(NULL),
-                 matrix = matrix,
-                 offset = offset)
+lfp_total <- function(data, labels_age, n_comp, eps) {
+  make_total(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
 }
-
-
-
-
-
-

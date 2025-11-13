@@ -1,5 +1,29 @@
 
 ## HAS_TESTS
+#' Check that 'eps' is Positive Non-NA Finite Numeric Scalar
+#'
+#' @param eps A numeric scalar
+#'
+#' @returns TRUE, invisibly
+#' 
+#' @noRd
+check_eps <- function(eps) {
+  if (!is.numeric(eps))
+    cli::cli_abort(c("{.arg eps} is non-numeric.",
+                     i = "{.arg eps} has class {.cls {class(eps)}}."))
+  if (length(eps) != 1L)
+    cli::cli_abort("{.arg eps} does not have length 1.")
+  if (is.na(eps))
+    cli::cli_abort("{.arg eps} is {.val {NA}}.")
+  if (is.infinite(eps))
+    cli::cli_abort("{.arg eps} is non-finite.")
+  if (eps <= 0)
+    cli::cli_abort("{.arg eps} is non-positive.")
+  invisible(TRUE)
+}
+
+
+## HAS_TESTS
 #' Check that an Object is a Matrix
 #'
 #' @param x An object

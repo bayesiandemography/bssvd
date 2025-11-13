@@ -1,4 +1,26 @@
 
+#' Census Data on School Attendance
+#'
+#' Data on school attendance rates,
+#' by age and sex, from censuses,
+#' assembled by the United Nations
+#' Statistics Division.
+#'
+#' @format
+#' A tibble with 7668 rows and with columns
+#' "Country or Area", "Year", "Area", "Sex",
+#' "Age", "School attendance", "Record Type",
+#' "Reliability", "Source Year", "Value",
+#' and "Value Footnotes"
+#'
+#' @source Downloaded from table
+#' "Population 5 to 24 years of age by school
+#' attendance, sex and urban/rural residence"
+#' from the "Population Censuses' Datasets (1995 - Present)"
+#' in the [Demographic Statistics Database](https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml). Accessed 22 October 2025.
+"un_csa_subset"
+
+
 #' OECD Data on Labour Force Participation
 #'
 #' Data on labour force participation rates
@@ -69,23 +91,4 @@
 #' https://unstats.un.org/unsd/methodology/m49/
 #' on 13 October 2025.
 "country_code"
-
-
-#' Marital Status
-#'
-#' Mapping between reported marital statuses
-#' reported in the World Marriage Data database
-#' and variables 'currently_married' and 'ever_married'.
-#'
-#' @format
-#' A tibble with 35 rows and with
-#' columns `marital_status` and `currently_married`,
-#' and `ever_married`.
-#'
-#' @source Marital statuses derived from data in
-#' file `undesa_pd_2019_wmd_marital_status.xlsx`
-#' downloaded from the United Nations Population Division
-#' website https://www.un.org/development/desa/pd/data/world-marriage-data
-#' on 10 October 2025.
-"marital_status"
 

@@ -8,7 +8,8 @@ coef_hmd(
   zipfile,
   n_comp = 5,
   date = c("2025-09-25", "2024-02-26"),
-  year_min = NULL
+  year_min = NULL,
+  eps = 1e-05
 )
 }
 \arguments{
@@ -19,13 +20,16 @@ A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
 
+\item{date}{Date on which data produced.
+Choices are \code{"2025-09-25"}, \code{"2024-02-26"}.
+(Class is character, not Date.)}
+
 \item{year_min}{Only include data for
 \code{year_min} onwards. Ignored if
 \code{year_min} is \code{NULL} (the default).}
 
-\item{Date}{on which data produced.
-Choices are \code{"2025-09-25"}, \code{"2024-02-26"}.
-(Class is character, not Date.)}
+\item{eps}{Floor for rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -38,8 +42,16 @@ The coefficients are a
 scaled version of the \eqn{U} matrix
 from the SVD.
 }
+\section{Truncation and transformation}{
+
+
+Rates below \code{eps} are shifted to \code{eps},
+and all rates are log-transformed,
+before the SVD is applied.
+}
+
 \examples{
-zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
                        package = "bssvd")
 coef_hmd(zipfile)
 }
@@ -48,7 +60,7 @@ coef_hmd(zipfile)
 \item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Put data
 from the Human Mortality Database
 into the format required by
-the \code{ssvd()} function in \code{bage}
+the \code{ssvd()} function in \pkg{bage}
 \item \code{\link[=tidy_hmd]{tidy_hmd()}} Format data from the
 Human Mortality Database into
 a tidy data frame

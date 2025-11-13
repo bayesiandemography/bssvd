@@ -4,7 +4,13 @@
 \alias{data_ssvd_hfd}
 \title{Prepare Data from the Human Fertility Database}
 \usage{
-data_ssvd_hfd(data, age_min_max = 15, age_max_min = 50, n_comp = 5)
+data_ssvd_hfd(
+  data,
+  age_min_max = 15,
+  age_max_min = 50,
+  n_comp = 5,
+  eps = 1e-05
+)
 }
 \arguments{
 \item{data}{A data frame containing HFD data.}
@@ -15,6 +21,9 @@ Defaults are \code{15} and \code{50}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Floor for rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -63,8 +72,15 @@ value includes ASFRs from older age groups in the data.
 For instance, if the classification in the return value
 starts at age 15, but the data starts at age 12,
 the ASFR for age 15 includes ASFRs from ages 12, 13, and 14.
-
 This shifting of ASFRs is common in analyses of fertility.
+}
+
+\section{Truncation and transformation}{
+
+
+Rates below \code{eps} are shifted to \code{eps},
+and all rates are log-transformed,
+before the SVD is applied.
 }
 
 \examples{
@@ -74,7 +90,7 @@ data
 \seealso{
 \itemize{
 \item \code{\link[=coef_hfd]{coef_hfd()}} Obtain time series
-of coefficients
+of SVD coefficients
 from Human Fertility Database data
 \item \code{\link[=tidy_hfd]{tidy_hfd()}} Format data from the
 Human Fertility Database into

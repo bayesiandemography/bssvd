@@ -4,7 +4,7 @@
 \alias{data_ssvd_lfp}
 \title{Prepare OECD Data on Labour Force Participation Rates}
 \usage{
-data_ssvd_lfp(data, age_max = 75, n_comp = 5, year_min = NULL)
+data_ssvd_lfp(data, age_max = 75, n_comp = 5, year_min = NULL, eps = 1e-05)
 }
 \arguments{
 \item{data}{A data frame containing OECD data.}
@@ -18,6 +18,10 @@ to include in result. Default is \code{5}.}
 \item{year_min}{Only include data for
 \code{year_min} onwards. Ignored if
 \code{year_min} is \code{NULL} (the default).}
+
+\item{eps}{Parameter for truncating
+probabililities or rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -46,6 +50,10 @@ lfp_df <- as.data.frame(lfp_sdmx)   ## can also be slow
 }\if{html}{\out{</div>}}
 }
 
+\section{coef_lfp Truncation and transformation}{
+NA
+}
+
 \examples{
 data <- data_ssvd_lfp(oecd_lfp_subset)
 data
@@ -55,7 +63,7 @@ data
 \item \code{\link[=tidy_lfp]{tidy_lfp()}} Format OECD labour force
 participation data into a tidy data frame.
 \item \code{\link[=coef_lfp]{coef_lfp()}} Obtain time series
-of coefficients for OECD labour force
+of SVD coefficients for OECD labour force
 participation data
 }
 }

@@ -4,16 +4,24 @@
 ## HAS_TESTS
 #' Obtain Coefficients from Scaled SVD of HFD Data
 #'
-#' Obtain time series of coefficients from a
+#' Obtain time series of SVD coefficients from a
 #' scaled SVD of data from the
 #' [Human Fertility Database](https://www.humanfertility.org/Home/Index).
 #' The coefficents are a
 #' scaled version of the \eqn{U} matrix
 #' from the SVD.
 #'
+#' @section Truncation and transformation:
+#'
+#' Rates below `eps` are shifted to `eps`,
+#' and all rates are log-transformed,
+#' before the SVD is applied. 
+#'
 #' @param data A data frame containing HFD data.
 #' @param n_comp Number of SVD components
 #' to include in result. Default is `5`.
+#' @param eps Floor for rates.
+#' Default is `0.00001`.
 #'
 #' @returns A tibble
 #'
@@ -21,7 +29,7 @@
 #' - [data_ssvd_hfd()]Put data
 #'   from the Human Fertility Database
 #'   into the format required by the
-#'   `ssvd()` function in `bage`.
+#'   `ssvd()` function in \pkg{bage}.
 #' - [tidy_hfd()] Format data from the
 #'   Human Fertility Database into
 #'   a tidy data frame
@@ -29,15 +37,20 @@
 #' @examples
 #' coef_hfd(asfr_subset)
 #' @export
-coef_hfd <- function(data, n_comp = 5) {
+coef_hfd <- function(data,
+                     n_comp = 5,
+                     eps = 0.00001) {
   poputils::check_n(n = n_comp,
                     nm_n = "n_comp",
                     min = 3L,
                     max = 6L,
                     divisible_by = NULL)
+  check_eps(eps)
   n_comp <- as.integer(n_comp)
   data <- tidy_hfd(data)
-  hfd_calculate_coef(data = data, n_comp = n_comp)
+  hfd_calculate_coef(data = data,
+                     n_comp = n_comp,
+                     eps = eps)
 }
 
 
@@ -85,8 +98,9 @@ coef_hfd <- function(data, n_comp = 5) {
 #' For instance, if the classification in the return value
 #' starts at age 15, but the data starts at age 12,
 #' the ASFR for age 15 includes ASFRs from ages 12, 13, and 14.
-#'
 #' This shifting of ASFRs is common in analyses of fertility.
+#'
+#' @inheritSection coef_hfd Truncation and transformation
 #'
 #' @inheritParams coef_hfd
 #' @param age_min_max,age_max_min Every age classification
@@ -97,7 +111,7 @@ coef_hfd <- function(data, n_comp = 5) {
 #'
 #' @seealso
 #' - [coef_hfd()] Obtain time series
-#'   of coefficients
+#'   of SVD coefficients
 #'   from Human Fertility Database data
 #' - [tidy_hfd()] Format data from the
 #'   Human Fertility Database into
@@ -110,7 +124,8 @@ coef_hfd <- function(data, n_comp = 5) {
 data_ssvd_hfd <- function(data,
                           age_min_max = 15,
                           age_max_min = 50,
-                          n_comp = 5) {
+                          n_comp = 5,
+                          eps = 0.00001) {
   poputils::check_n(n = age_min_max,
                     nm_n = "age_min_max",
                     min = NULL,
@@ -126,6 +141,7 @@ data_ssvd_hfd <- function(data,
                     min = 3L,
                     max = 6L,
                     divisible_by = NULL)
+  check_eps(eps)
   cli::cli_progress_message("Tidying data...")
   data <- tidy_hfd(data)
   labels_age <- hfd_make_labels_age(data = data,
@@ -134,7 +150,8 @@ data_ssvd_hfd <- function(data,
   cli::cli_progress_message("Carrying out SVD for 'total'...")
   hfd_total(data = data,
             labels_age = labels_age,
-            n_comp = n_comp)
+            n_comp = n_comp,
+            eps = eps)
 }
 
 
@@ -153,9 +170,9 @@ data_ssvd_hfd <- function(data,
 #' - [data_ssvd_hfd()]Put data
 #'   from the Human Fertility Database
 #'   into the format required by the
-#'   `ssvd()` function in `bage`.
+#'   `ssvd()` function in \pkg{bage}.
 #' - [coef_hfd()] Obtain time series
-#'   of coefficients
+#'   of SVD coefficients
 #'   from Human Fertility Database data
 #'
 #' @examples
@@ -184,11 +201,12 @@ tidy_hfd <- function(data) {
 #'
 #' @param data A data frame, typically produced by 'tidy_hfd'.
 #' @param n_comp Number of components.
+#' @param eps Floor for rates.
 #'
 #' @returns A tibble
 #' 
 #' @noRd
-hfd_calculate_coef <- function(data, n_comp) {
+hfd_calculate_coef <- function(data, n_comp, eps) {
   data$age <- poputils::reformat_age(data$age)
   ord <- with(data, order(country, time, age))
   data <- data[ord, , drop = FALSE]
@@ -197,7 +215,7 @@ hfd_calculate_coef <- function(data, n_comp) {
                              cols = c("country", "time"),
                              measure = "value")
   ans <- remove_cols_with_na(x = ans, n_comp = n_comp)
-  ans <- replace_zeros(ans)
+  ans <- replace_zeros(ans, eps = eps)
   ans <- log(ans)
   country_time <- colnames(ans)
   ans <- svd(ans, nu = 0L, nv = n_comp)$v
@@ -310,11 +328,12 @@ hfd_make_labels_age <- function(data, age_min_max, age_max_min) {
 #' @param data A data frame
 #' @param labels_age List of character vectors
 #' @param n_comp Numbers of SVD components
+#' @param eps Floor for rates
 #'
 #' @returns A data frame
 #'
 #' @noRd
-hfd_total <- function(data, labels_age, n_comp) {
+hfd_total <- function(data, labels_age, n_comp, eps) {
   data_split <- .mapply(hfd_get_data_one,
                         dots = list(labels_age = labels_age),
                         MoreArgs = list(data = data))
@@ -327,7 +346,8 @@ hfd_total <- function(data, labels_age, n_comp) {
   ssvd_split <- lapply(x_split,
                        make_matrix_and_offset,
                        transform = "log",
-                       n_comp = n_comp)
+                       n_comp = n_comp,
+                       eps = eps)
   matrix <- lapply(ssvd_split, function(x) x$matrix)
   offset <- lapply(ssvd_split, function(x) x$offset)
   tibble::tibble(type = "total",

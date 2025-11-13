@@ -8,7 +8,8 @@ data_ssvd_himd(
   zipfile,
   time_interval = 1,
   measure_type = c("rate", "prob"),
-  n_comp = 5
+  n_comp = 5,
+  eps = 1e-05
 )
 }
 \arguments{
@@ -28,6 +29,10 @@ Default is \code{"rate"}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Parameter for truncating
+probabililities or rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -74,23 +79,21 @@ allow values where \code{time_interval} is
 one change in residence in a year is unusual,
 then one-year probabilities and should
 in fact be very similar.
+}
 
-When values are being treated as probabilities,
-a logit transform is applied before
-carrying out the SVD. When they are being
-treated as rates, a log transform is applied.
+\section{coef_himd Truncation and transformation}{
+NA
 }
 
 \examples{
-zipfile <- system.file("extdata", "himd_subset.zip",
+zipfile <- system.file("extdata", "himd_20241023_subset.zip",
                        package = "bssvd")
-data <- data_ssvd_himd(zipfile)
-data
+data_ssvd_himd(zipfile)
 }
 \seealso{
 \itemize{
 \item \code{\link[=coef_hfd]{coef_hfd()}} Obtain time series
-of coefficients
+of SVD coefficients
 for Human Internal Migration Database data
 \item \code{\link[=tidy_hmd]{tidy_hmd()}} Format data from the
 Human Internal Migration Database into

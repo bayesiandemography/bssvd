@@ -1,4 +1,39 @@
 
+## 'check_eps' ----------------------------------------------------------------
+
+test_that("'check_eps' returns TRUE with valid inputs", {
+    expect_true(check_eps(0.001))
+    expect_true(check_eps(eps = 0.000000001))
+})
+
+test_that("'check_eps' throws correct error with non-numeric", {
+    expect_error(check_eps("4"),
+                 "`eps` is non-numeric")
+})
+
+test_that("'check_eps' throws correct error with 0 length", {
+    expect_error(check_eps(integer()),
+                 "`eps` does not have length 1")
+})
+
+test_that("'check_eps' throws correct error with NA", {
+    expect_error(check_eps(NA_real_),
+                 "`eps` is NA")
+})
+
+test_that("'check_eps' throws correct error with Inf", {
+    expect_error(check_eps(Inf),
+                 "`eps` is non-finite.")
+})
+
+test_that("'check_eps' throws correct error with non-positive", {
+    expect_error(check_eps(0),
+                 "`eps` is non-positive.")
+    expect_error(check_eps(-1),
+                 "`eps` is non-positive.")
+})
+
+
 ## 'check_is_matrix' ----------------------------------------------------------
 
 test_that("'check_is_matrix' works with valid inputs", {
@@ -58,7 +93,6 @@ test_that("'check_n' throws correct error when not divisible by 'divisible_by'",
     expect_error(check_n(n = 61, nm_n = "n", min = 4, max = Inf, divisible_by = 5L),
                  "`n` is not divisible by 5")
 })
-
 
 
 ## 'check_numeric' ------------------------------------------------------------

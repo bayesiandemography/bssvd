@@ -4,25 +4,36 @@
 \alias{coef_hfd}
 \title{Obtain Coefficients from Scaled SVD of HFD Data}
 \usage{
-coef_hfd(data, n_comp = 5)
+coef_hfd(data, n_comp = 5, eps = 1e-05)
 }
 \arguments{
 \item{data}{A data frame containing HFD data.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Floor for rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
 }
 \description{
-Obtain time series of coefficients from a
+Obtain time series of SVD coefficients from a
 scaled SVD of data from the
 \href{https://www.humanfertility.org/Home/Index}{Human Fertility Database}.
 The coefficents are a
 scaled version of the \eqn{U} matrix
 from the SVD.
 }
+\section{Truncation and transformation}{
+
+
+Rates below \code{eps} are shifted to \code{eps},
+and all rates are log-transformed,
+before the SVD is applied.
+}
+
 \examples{
 coef_hfd(asfr_subset)
 }
@@ -31,7 +42,7 @@ coef_hfd(asfr_subset)
 \item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}}Put data
 from the Human Fertility Database
 into the format required by the
-\code{ssvd()} function in \code{bage}.
+\code{ssvd()} function in \pkg{bage}.
 \item \code{\link[=tidy_hfd]{tidy_hfd()}} Format data from the
 Human Fertility Database into
 a tidy data frame
