@@ -1,4 +1,56 @@
 
+## 'calculate_coef_nosex' -----------------------------------------------------
+
+test_that("'calculate_coef_nosex' works with valid inputs - log", {
+  data <- tidy_hfd(asfr_subset)
+  suppressMessages(ans <- calculate_coef_nosex(data,
+                                               n_comp = 5L,
+                                               transform = "log",
+                                               eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+test_that("'calculate_coef_nosex' works with valid inputs - logit", {
+  data <- tidy_hfd(asfr_subset)
+  suppressMessages(ans <- calculate_coef_nosex(data,
+                                               n_comp = 5L,
+                                               transform = "logit",
+                                               eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+test_that("'calculate_coef_nosex' throws error withe invalid transform", {
+  data <- tidy_hfd(asfr_subset)
+  expect_error(calculate_coef_nosex(data,
+                                    n_comp = 5L,
+                                    transform = "wrong",
+                                    eps = 0.001),
+               "Internal error")
+})
+
+
+## 'calculate_coef_sex' -------------------------------------------------------
+
+test_that("'calculate_coef_sex' works with valid inputs", {
+  file <- system.file("extdata",
+                      "undesa_pd_2019_wmd_marital_status_subset.xlsx",
+                      package = "bssvd")
+  data <- tidy_wmd(file)
+  suppressMessages(ans <- calculate_coef_sex(data,
+                                             n_comp = 3,
+                                             transform = "logit",
+                                             eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+
 ## 'get_ages_max' -------------------------------------------------------------
 
 test_that("'get_ages_max' works", {

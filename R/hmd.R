@@ -179,7 +179,7 @@ data_ssvd_hmd <- function(zipfile,
 #'                        package = "bssvd")
 #' tidy_hmd(zipfile)
 #' tidy_hmd(zipfile,
-#'          date = "2024-02-26",
+#'          date = "2025-09-25",
 #'          year_min = 1950)
 #' @export
 tidy_hmd <- function(zipfile,
@@ -269,34 +269,11 @@ hmd_aggregate_mx_Lx <- function(data) {
 #' @noRd
 hmd_calculate_coef <- function(data, n_comp, eps) {
   data <- data[data$type_age == "single", , drop = FALSE]
-  data$age <- poputils::reformat_age(data$age)
-  ord <- with(data, order(sex, country, time, age))
-  data <- data[ord, , drop = FALSE]
-  data <- vctrs::vec_split(data[c("country", "time", "age", "mx")], data["sex"])
-  ans <- lapply(data$val,
-                poputils::to_matrix,
-                rows = "age",
-                cols = c("country", "time"),
-                measure = "mx")
-  ans <- lapply(ans, remove_cols_with_na, n_comp = n_comp)
-  ans <- lapply(ans, replace_zeros, eps = eps)
-  ans <- lapply(ans, log)
-  country_time <- lapply(ans, colnames)
-  ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
-  ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
-  for (i in seq_along(ans)) {
-    dimnames(ans[[i]]) <- list(country_time = country_time[[i]],
-                               component = paste("Component", seq_len(n_comp)))
-    ans[[i]] <- as.data.frame.table(ans[[i]], responseName = "coef", stringsAsFactors = FALSE)
-    ans[[i]]$sex <- data$key$sex[[i]]
-  }
-  ans <- vctrs::vec_rbind(!!!ans)
-  p <- "^(.*)\\.(.*)$"
-  ans$country <- sub(p, "\\1", ans$country_time)
-  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
-  ans <- ans[c("sex", "country", "time", "component", "coef")]
-  ans <- tibble::tibble(ans)
-  ans
+  names(data)[match("mx", names(data))] <- "value"
+  calculate_coef_sex(data = data,
+                     n_comp = n_comp,
+                     transform = "log",
+                     eps = eps)
 }
 
 
@@ -612,6 +589,8 @@ hmd_unzip_v2 <- function(zipfile) {
   on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
   utils::unzip(zipfile, exdir = tmp_dir)
   paths <- list.files(tmp_dir, full.names = TRUE, recursive = TRUE)
+  p <- paste(files, collapse = "|")
+  paths <- grep(p, paths, value = TRUE)
   get_data <- function(path) {
     sex <- sub(".*lt_([a-z]+).*", "\\1", path)
     type_age <- sub(".*ltper_([1x5]+).*", "\\1", path)

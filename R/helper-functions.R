@@ -8,8 +8,9 @@
 #' (SVD) to construct a parsimonious representation
 #' of a set of rates, probabilities, means, or
 #' other values. The construction proceeds as follows:
-#' - transform values in matrix `x` (eg take logs)
-#' - carry out a SVD on the transformed version of `x`
+#' - shift any values outside the permitted range;
+#' - transform values in matrix `x` (eg take logs);
+#' - carry out a SVD on the transformed version of `x`; and
 #' - centre and scale the results from the SVD to produce
 #' matrix `matrix` and vector `offset`.
 #'
@@ -38,22 +39,23 @@
 #' When `transform` is `"log"` or `"logit"`,
 #' `make_matrix_and_offset()` converts any
 #' values in `x` that are less than `eps` to
-#' `eps` before transforming.
+#' values greater than or equal to `eps` before
+#' transforming. The converted value is based on
+#' on a main effects model.
 #' 
 #' When `transform` is `"logit"`,
 #' `make_matrix_and_offset() converts any
 #' values greater than `1-eps` to `1-eps`
-#' before transforming.
+#' before transforming. The converted value
+#' is based on main effects model.
 #'
 #' @param x A matrix with value such as rates,
 #' probabilities, or means.
 #' @param transform `"log"`, `"logit"`, or `"none"`.
-#' Defaults to `"log"`.
 #' @param n_comp Number of components.
 #' @param eps Quantity used in setting
 #' floor and ceiling on value. See
 #' below for details. Default is `0.00001`.
-#' 
 #'
 #' @returns A named list with two elements:
 #' - `matrix`, a numeric matrix
@@ -64,12 +66,12 @@
 #'             nrow = 10,
 #'             ncol = 15)
 #' x
-#' make_matrix_and_offset(x)
+#' make_matrix_and_offset(x, transform = "log")
 #' make_matrix_and_offset(x, transform = "none")
-#' make_matrix_and_offset(x, n_comp = 2)
+#' make_matrix_and_offset(x, transform = "logit", n_comp = 2)
 #' @export
 make_matrix_and_offset <- function(x,
-                                   transform = c("log", "logit", "none"),
+                                   transform,
                                    n_comp = 10,
                                    eps = 0.00001) {
   ## check 'n_comp'
@@ -90,7 +92,7 @@ make_matrix_and_offset <- function(x,
                      i = "{.code ncol(x)}: {.val {ncol(x)}}.",
                      i = "{.arg n_comp}: {.val {n_comp}}."))
   ## check 'transform'
-  transform <- match.arg(transform)
+  transform <- match.arg(transform, choices = c("log", "logit", "none"))
   if (transform %in% c("log", "logit")) {
     n_neg <- sum(x < 0)
     if (n_neg > 0)
@@ -143,113 +145,14 @@ make_matrix_and_offset <- function(x,
 }
 
 
-## NO_TESTS
-#' Calculate the Percent of Variance Explained
-#' by Components in SVD
-#'
-#' Calculate what percent of variance in a dataset
-#' can be explained by the first `n_comp` components
-#' of a singular value decompositon. The dataset should
-#' include age, a single sex or gender category,
-#' and one or more classifying variables.
-#'
-#' The dataset is transformed
-#' before the SVD is applied. If the transformation
-#' is `"log"`, then zeros are moved upwards to the
-#' lowest non-zero value appearing in the data
-#' before the transformation is applied.
-#' If the transformation is `"logit"`, then
-#' zeros are moved upwards and ones are
-#' moved downward.
-#'
-#' `data` must contain a variable called `"age"`.
-#' It must also contain the variables named by
-#' the `measure` and `cols` arguments. The age
-#' and `cols` arguments must uniquely identify
-#' all cells in the dataset.
-#'
-#' Before the log or logit transforms are applied
-#' all values less than `eps` are changed to `eps`.
-#' Before the logit transform is applied, all values
-#' greater than `1 - eps` are changed to `1 - eps`.
-#'
-#' @param data A data frame
-#' @param measure Name of the rate or proportion
-#' being modelled.
-#' @param cols Names of the categorical variables
-#' used to distinguish different age profiles.
-#' @param transform Transformation to apply
-#' to the data: `"log"` (the default) or `"logit"`.
-#' @param n_comp Number of components to
-#' give percentages for. Default is `5`.
-#' @param eps Parameter controlling truncation.
-#' See below for details. Default is `0.00001`.
-#'
-#' @returns A numeric vector of length `n_comp`.
-#'
-#' @export
-percent_variance <- function(data,
-                             measure,
-                             cols = c("country", "time"),
-                             transform = c("log", "logit"),
-                             n_comp = 5,
-                             eps = 0.00001) {
-  transform <- match.arg(transform)
-  check_n(n = n_comp,
-          nm_n = "n_comp",
-          min = 1L,
-          max = NULL,
-          divisible_by = 1L)
-  check_eps(eps)
-  nms_required <- c(measure, cols, "age")
-  nms_data <- names(data)
-  is_in_data <- nms_required %in% nms_data
-  i_not_in_data <- match(FALSE, is_in_data, nomatch = 0L)
-  if (i_not_in_data > 0L) {
-    nm_mis <- nms_required[[i_not_in_data]]
-    cli::cli_abort("Variable {.var {nm_mis}} not found in {.arg data}.")
-  }
-  data$age <- poputils::reformat_age(data$age)
-  cols_ord <- c("age", cols)
-  data_cols_ord <- unname(as.list(data[cols_ord]))
-  args <- c(data_cols_ord, list(decreasing = FALSE))
-  ord <- do.call(order, args)
-  data <- data[ord, , drop = FALSE]
-  m <- poputils::to_matrix(x = data,
-                           rows = "age",
-                           cols = cols,
-                           measure = measure)
-  m <- remove_cols_with_na(x = m, n_comp = n_comp)
-  if (transform == "log") {
-    m <- replace_zeros(m, eps = eps)
-    m <- log(m)
-  }
-  else if (transform == "logit") {
-    m <- replace_zeros_ones(m, eps = eps)
-    m <- poputils::logit(m)
-  }
-  else
-    cli::cli_abort("Internal error: Unexpected value for transform") # nocov
-  svd <- svd(m, nu = 0L, nv = 0L)
-  print(svd$d)
-  svd2 <- svd(m)
-  print(svd2$d)
-  sing_val <- svd$d
-  n_sing_val <- length(sing_val)
-  if (n_sing_val < n_comp)
-    cli::cli_abort(paste("Number of singular values ({.val n_sing_val})",
-                         "less than {.arg n_comp} ({.val {n_comp}})."))
-  ans <- 100 * cumsum(sing_val^2) / sum(sing_val^2)
-  ans <- ans[seq_len(n_comp)]
-  ans
-}                   
 
 
 
 ## Internal -------------------------------------------------------------------
 
 ## HAS_TESTS
-#' Obtain the Scaled 'U' Matrix From an SVD of Rates or Probabilities
+#' Obtain the Scaled 'U' Matrix From an
+#' SVD of Rates or Probabilities, without Sex/Gender Variable
 #'
 #' Assumes that the dataset has a single set of ages.
 #'
@@ -261,11 +164,62 @@ percent_variance <- function(data,
 #' @returns A tibble
 #' 
 #' @noRd
-calculate_coef <- function(data, n_comp, transform, eps) {
+calculate_coef_nosex <- function(data, n_comp, transform, eps) {
+  data$age <- poputils::reformat_age(data$age)
+  ord <- with(data, order(country, time, age))
+  data <- data[ord, , drop = FALSE]
+  ans <- poputils::to_matrix(data,
+                             rows = "age",
+                             cols = c("country", "time"),
+                             measure = "value")
+  ans <- remove_cols_with_na(x = ans, n_comp = n_comp)
+  if (transform == "log") {
+    ans <- replace_zeros(ans, eps = eps)
+    ans <- log(ans)
+  }
+  else if (transform == "logit") {
+    ans <- replace_zeros_ones(x = ans, eps = eps)
+    ans <- poputils::logit(ans)
+  }
+  else
+    cli::cli_abort("Internal error: Invalid value for 'transform'.")
+  country_time <- colnames(ans)
+  ans <- svd(ans, nu = 0L, nv = n_comp)$v
+  ans <- scale(ans, center = TRUE, scale = TRUE)
+  dimnames(ans) <- list(country_time = country_time,
+                        component = paste("Component", seq_len(n_comp)))
+  ans <- as.data.frame.table(ans,
+                             responseName = "coef",
+                             stringsAsFactors = FALSE)
+  p <- "^(.*)\\.(.*)$"
+  ans$country <- sub(p, "\\1", ans$country_time)
+  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
+  ans <- ans[c("country", "time", "component", "coef")]
+  ans <- tibble::tibble(ans)
+  ans
+}  
+
+
+## HAS_TESTS
+#' Obtain the Scaled 'U' Matrix From an
+#' SVD of Rates or Probabilities, with Sex/Gender Variable
+#'
+#' Assumes that the dataset has a single set of ages.
+#'
+#' @param data A data frame, typically produced by 'tidy_lfp'.
+#' @param n_comp Number of components.
+#' @param transform log (for rates) or logit (for probabilities)
+#' @param eps Value controlling truncation
+#'
+#' @returns A tibble
+#' 
+#' @noRd
+calculate_coef_sex <- function(data, n_comp, transform, eps) {
   data$age <- poputils::reformat_age(data$age)
   ord <- with(data, order(sex, country, time, age))
   data <- data[ord, , drop = FALSE]
-  data <- vctrs::vec_split(data[c("country", "time", "age", "value")], data["sex"])
+  data <- vctrs::vec_split(data[c("country", "time", "age", "value")],
+                           data["sex"])
   ans <- lapply(data$val,
                 poputils::to_matrix,
                 rows = "age",
@@ -281,14 +235,17 @@ calculate_coef <- function(data, n_comp, transform, eps) {
     ans <- lapply(ans, poputils::logit)
   }
   else
-    cli::cli_abort("Internal error: Invalid valud for 'transform'.")
+    cli::cli_abort("Internal error: Invalid value for 'transform'.")
   country_time <- lapply(ans, colnames)
   ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
   ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
   for (i in seq_along(ans)) {
     dimnames(ans[[i]]) <- list(country_time = country_time[[i]],
-                               component = paste("Component", seq_len(n_comp)))
-    ans[[i]] <- as.data.frame.table(ans[[i]], responseName = "coef", stringsAsFactors = FALSE)
+                               component = paste("Component",
+                                                 seq_len(n_comp)))
+    ans[[i]] <- as.data.frame.table(ans[[i]],
+                                    responseName = "coef",
+                                    stringsAsFactors = FALSE)
     ans[[i]]$sex <- data$key$sex[[i]]
   }
   ans <- vctrs::vec_rbind(!!!ans)

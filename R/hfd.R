@@ -207,28 +207,10 @@ tidy_hfd <- function(data) {
 #' 
 #' @noRd
 hfd_calculate_coef <- function(data, n_comp, eps) {
-  data$age <- poputils::reformat_age(data$age)
-  ord <- with(data, order(country, time, age))
-  data <- data[ord, , drop = FALSE]
-  ans <- poputils::to_matrix(data,
-                             rows = "age",
-                             cols = c("country", "time"),
-                             measure = "value")
-  ans <- remove_cols_with_na(x = ans, n_comp = n_comp)
-  ans <- replace_zeros(ans, eps = eps)
-  ans <- log(ans)
-  country_time <- colnames(ans)
-  ans <- svd(ans, nu = 0L, nv = n_comp)$v
-  ans <- scale(ans, center = TRUE, scale = TRUE)
-  dimnames(ans) <- list(country_time = country_time,
-                        component = paste("Component", seq_len(n_comp)))
-  ans <- as.data.frame.table(ans, responseName = "coef", stringsAsFactors = FALSE)
-  p <- "^(.*)\\.(.*)$"
-  ans$country <- sub(p, "\\1", ans$country_time)
-  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
-  ans <- ans[c("country", "time", "component", "coef")]
-  ans <- tibble::tibble(ans)
-  ans
+  calculate_coef_nosex(data = data,
+                       n_comp = n_comp,
+                       transform = "log",
+                       eps = eps)
 }  
 
 

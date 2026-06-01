@@ -2,7 +2,7 @@
 % Please edit documentation in R/csa.R
 \name{data_ssvd_csa}
 \alias{data_ssvd_csa}
-\title{Prepare World Marriage Data}
+\title{Prepare Census School Attendance Data}
 \usage{
 data_ssvd_csa(data, n_comp = 5, eps = 1e-05)
 }
@@ -13,25 +13,29 @@ unprocessed).}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Parameter for truncating
+probabililities.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
 }
 \description{
-Process marriage data downloaded from
-the UN Statistics Division's
-\href{https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets}{Population Censuses' Datasets},
-collection so it is ready to create a scaled SVD.
+Process school attendance data,
+so it is ready to create a scaled SVD.
 }
 \section{Usage}{
 
 \strong{Step 1: Download data}
 
-Go to to page
-\href{https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets}{Population Censuses' Datasets},
-Go to the table "Population 15 years of age and over by educational attainment, age and sex".
-Go to the download tab, and download. Only 100,000 rows can be downloaded at one time
-so this needs to be done in two steps.
+Go to to the
+\href{https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets}{Population Censuses' Datasets} database, then to the table
+"Population 15 years of age and over
+by educational attainment, age and sex".
+Go to the download tab, and download. Only 100,000 rows
+can be downloaded at one time
+so this needs to be done in multiple steps.
 
 \strong{Step 2: Combine datasets}
 
@@ -55,8 +59,8 @@ data_ssvd_csa(un_csa_subset)
 \itemize{
 \item \code{\link[=coef_csa]{coef_csa()}} Obtain time series
 of SVD coefficients
-from World Marriage Data
-\item \code{\link[=tidy_csa]{tidy_csa()}} Format World Marriage Data
-into a tidy data frame.
+from census cchool attendance data
+\item \code{\link[=tidy_csa]{tidy_csa()}} Format census school attendance
+data into a tidy data frame.
 }
 }

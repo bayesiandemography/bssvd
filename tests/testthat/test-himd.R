@@ -10,6 +10,12 @@ test_that("'coef_himd' works with valid inputs", {
   expect_equal(mean(ans$coef), 0)
 })
 
+test_that("'coef_himd' throws error with invalid interval", {
+  fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
+  expect_error(coef_himd(fn, time_interval = 6),
+               "Invalid time interval.")
+})
+
 
 ## 'data_ssvd_himd' -----------------------------------------------------------
 
@@ -40,6 +46,18 @@ test_that("'data_ssvd_himd' works with valid inputs - time_interval is 1, measur
   expect_s3_class(ans, "bage_ssvd")
 })
 
+test_that("'data_ssvd_himd' throws error with invalid interval", {
+  fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
+  expect_error(data_ssvd_himd(fn, time_interval = 6),
+               "Invalid time interval.")
+})
+
+test_that("'data_ssvd_himd' throws error with rate and time interval 5", {
+  fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
+  expect_error(data_ssvd_himd(fn, measure_type = "rate", time_interval = 5),
+               "`measure_type` can only be \"rate\" if `time_interval` is 1")
+})
+
 
 ## 'tidy_himd' ----------------------------------------------------------------
 
@@ -47,6 +65,12 @@ test_that("'tidy_hmd' works with valid inputs", {
   fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
   suppressMessages(data <- tidy_himd(fn))
   expect_true(tibble::is_tibble(data))
+})
+
+test_that("'tidy_himd' throws error with invalid interval", {
+  fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
+  expect_error(tidy_himd(fn, time_interval = 6),
+               "Invalid time interval.")
 })
 
 
@@ -67,7 +91,7 @@ test_that("'himd_add_age_five' works with valid inputs", {
 
 ## 'himd_calculate_coef' ------------------------------------------------------
 
-test_that("'himd_calculate_coef' works with valid inputs", {
+test_that("'himd_calculate_coef' works with valid inputs - rate", {
   set.seed(0)
   data <- expand.grid(age = poputils::age_labels(type = "single", max = 45),
                       time = 2001:2005,
@@ -76,6 +100,21 @@ test_that("'himd_calculate_coef' works with valid inputs", {
                       age_open = 45)
   data$value <- runif(n = nrow(data))
   ans_obtained <- himd_calculate_coef(data, measure_type = "rate", n_comp = 5,
+                                      eps = 0.001)
+  expect_setequal(names(ans_obtained),
+                  c("country_orig_dest", "time", "component", "coef"))
+  expect_equal(mean(ans_obtained$coef), 0)
+})
+
+test_that("'himd_calculate_coef' works with valid inputs - prob", {
+  set.seed(0)
+  data <- expand.grid(age = poputils::age_labels(type = "single", max = 45),
+                      time = 2001:2005,
+                      country_orig_dest = c("A.a", "B.b", "C.c"),
+                      type_age = "single",
+                      age_open = 45)
+  data$value <- runif(n = nrow(data))
+  ans_obtained <- himd_calculate_coef(data, measure_type = "prob", n_comp = 5,
                                       eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("country_orig_dest", "time", "component", "coef"))
@@ -121,6 +160,12 @@ test_that("'himd_unzip' works with valid inputs", {
                     "time",
                     "age",
                     "value"))
+})
+
+test_that("'himd_unzipo' throws error with invalid interval", {
+  fn <- system.file("extdata", "himd_20241023_subset.zip", package = "bssvd")
+  expect_error(himd_unzip(fn, time_interval = 6),
+               "Invalid time interval.")
 })
 
 

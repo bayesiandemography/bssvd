@@ -6,6 +6,11 @@
 \usage{
 tidy_csa(data)
 }
+\arguments{
+\item{data}{Data frame with attendance data.
+(Data from multiple files combined, but otherwise
+unprocessed).}
+}
 \value{
 A tibble
 }
@@ -16,7 +21,7 @@ the UN Population Division's
 database.
 }
 \examples{
-tidy_wmd(un_csa_subset)
+tidy_csa(un_csa_subset)
 }
 \seealso{
 \itemize{

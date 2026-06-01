@@ -159,7 +159,7 @@ data_ssvd_himd <- function(zipfile,
   measure_type <- match.arg(measure_type)
   if ((measure_type == "rate") && (time_interval == 5))
     cli::cli_abort(paste("{.arg measure_type} can only be {.val rate} if",
-                         "{.arg time_interval} is {.val 1}."))
+                         "{.arg time_interval} is {.val {1}}."))
   poputils::check_n(n = n_comp,
                     nm_n = "n_comp",
                     min = 3L,
@@ -352,7 +352,7 @@ himd_total <- function(data, n_comp, transform, eps) {
 #' @noRd
 himd_unzip <- function(zipfile, time_interval) {
   if (!(time_interval %in% c(1, 5)))
-    cli::cli_abort("Invalid value for {.arg time_interval}.")
+    cli::cli_abort("Invalid time interval.")
   tmp_dir <- tempfile("himd_")
   dir.create(tmp_dir)
   on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)

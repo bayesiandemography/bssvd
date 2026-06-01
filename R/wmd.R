@@ -219,6 +219,8 @@ tidy_wmd <- function(file, status = c("current", "ever")) {
 }
 
 
+## Internal functions ---------------------------------------------------------
+
 ## HAS_TESTS
 #' Obtain the Scaled 'U' Matrix From an SVD of
 #' World Marriage Data 
@@ -231,10 +233,10 @@ tidy_wmd <- function(file, status = c("current", "ever")) {
 #' 
 #' @noRd
 wmd_calculate_coef <- function(data, n_comp, eps) {
-  calculate_coef(data = data,
-                 n_comp = n_comp,
-                 transform = "logit",
-                 eps = eps)
+  calculate_coef_sex(data = data,
+                     n_comp = n_comp,
+                     transform = "logit",
+                     eps = eps)
 }
 
 
@@ -253,6 +255,7 @@ wmd_indep <- function(data, labels_age, n_comp, eps) {
   make_indep(data = data,
              labels_age = labels_age,
              n_comp = n_comp,
+             transform = "logit",
              eps = eps)
 }
 
@@ -271,6 +274,7 @@ wmd_joint <- function(data, labels_age, n_comp, eps) {
   make_joint(data = data,
              labels_age = labels_age,
              n_comp = n_comp,
+             transform = "logit",
              eps = eps)
 }
 

@@ -14,6 +14,10 @@ unprocessed).}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{eps}{Parameter for truncating
+probabililities.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble

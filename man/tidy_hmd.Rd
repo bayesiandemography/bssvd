@@ -33,7 +33,7 @@ zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
                        package = "bssvd")
 tidy_hmd(zipfile)
 tidy_hmd(zipfile,
-         date = "2024-02-26",
+         date = "2025-09-25",
          year_min = 1950)
 }
 \seealso{

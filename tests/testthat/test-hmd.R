@@ -261,6 +261,12 @@ test_that("'hmd_unzip' works with data from 2025-09-25", {
   expect_identical(ans_obtained, ans_expected)
 })
 
+test_that("'hmd_unzip' throws error with invalid date", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  expect_error(hmd_unzip(fn, date = "2020-01-01"),
+               "Internal error")  
+})
+
 
 ## 'hmd_unzip_v1' -------------------------------------------------------------
 

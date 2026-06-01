@@ -252,10 +252,10 @@ tidy_lfp <- function(data,
 #' 
 #' @noRd
 lfp_calculate_coef <- function(data, n_comp, eps) {
-  calculate_coef(data = data,
-                 n_comp = n_comp,
-                 transform = "logit",
-                 eps = eps)
+  calculate_coef_sex(data = data,
+                     n_comp = n_comp,
+                     transform = "logit",
+                     eps = eps)
 }
 
 

@@ -30,6 +30,9 @@
 #' unprocessed).
 #' @param n_comp Number of SVD components
 #' to include in result. Default is `5`.
+#' @param eps Parameter for truncating
+#' probabililities.
+#' Default is `0.00001`.
 #'
 #' @returns A tibble
 #'
@@ -54,28 +57,28 @@ coef_csa <- function(data,
   n_comp <- as.integer(n_comp)
   check_eps(eps)
   data <- tidy_csa(data)
-  sch_calculate_coef(data = data,
+  csa_calculate_coef(data = data,
                      n_comp = n_comp,
                      eps = eps)
 }
 
 
 ## HAS_TESTS
-#' Prepare World Marriage Data
+#' Prepare Census School Attendance Data
 #' 
-#' Process marriage data downloaded from
-#' the UN Statistics Division's
-#' [Population Censuses' Datasets](https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets),
-#' collection so it is ready to create a scaled SVD.
+#' Process school attendance data,
+#' so it is ready to create a scaled SVD.
 #'
 #' @section Usage:
 #' **Step 1: Download data**
 #'
-#' Go to to page
-#' [Population Censuses' Datasets](https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets),
-#' Go to the table "Population 15 years of age and over by educational attainment, age and sex".
-#' Go to the download tab, and download. Only 100,000 rows can be downloaded at one time
-#' so this needs to be done in two steps.
+#' Go to to the
+#' [Population Censuses' Datasets](https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml#censusdatasets) database, then to the table
+#' "Population 15 years of age and over
+#' by educational attainment, age and sex".
+#' Go to the download tab, and download. Only 100,000 rows
+#' can be downloaded at one time
+#' so this needs to be done in multiple steps.
 #'
 #' **Step 2: Combine datasets**
 #'
@@ -97,9 +100,9 @@ coef_csa <- function(data,
 #' @seealso
 #' - [coef_csa()] Obtain time series
 #'   of SVD coefficients
-#'   from World Marriage Data
-#' - [tidy_csa()] Format World Marriage Data
-#'   into a tidy data frame.
+#'   from census cchool attendance data
+#' - [tidy_csa()] Format census school attendance
+#'   data into a tidy data frame.
 #' 
 #' @examples
 #' data_ssvd_csa(un_csa_subset)
@@ -117,12 +120,23 @@ data_ssvd_csa <- function(data,
   cli::cli_progress_message("Tidying data...")
   data <- tidy_csa(data)
   labels_age <- csa_make_labels_age()
+  cli::cli_progress_message("Carrying out SVD for 'total'...")
+  total <- csa_total(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'indep'...")
-  indep <- wmd_indep(data = data, labels_age = labels_age, n_comp = n_comp)
+  indep <- csa_indep(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'joint'...")
-  joint <- wmd_joint(data = data, labels_age = labels_age, n_comp = n_comp)
+  joint <- csa_joint(data = data,
+                     labels_age = labels_age,
+                     n_comp = n_comp,
+                     eps = eps)
   cli::cli_progress_message("Combining results...")
-  data <- vctrs::vec_rbind(indep, joint)
+  data <- vctrs::vec_rbind(total, indep, joint)
   data <- tibble::as_tibble(data)
   data
 }
@@ -136,7 +150,7 @@ data_ssvd_csa <- function(data,
 #' [World Migration Data](https://www.un.org/development/desa/pd/data/world-marriage-data),
 #' database.
 #'
-#' @inheritParams coef_wmd
+#' @inheritParams coef_csa
 #'
 #' @returns A tibble
 #'
@@ -149,7 +163,7 @@ data_ssvd_csa <- function(data,
 #'   the `ssvd()` function in \pkg{bage}
 #' 
 #' @examples
-#' tidy_wmd(un_csa_subset)
+#' tidy_csa(un_csa_subset)
 #' @export
 tidy_csa <- function(data) {
   data <- data[data$Area == "Total", , drop = FALSE]
@@ -172,6 +186,15 @@ tidy_csa <- function(data) {
                    data$time == 2017), , drop = FALSE] ## data error
   data <- data[!(data$country == "Algeria" &
                    data$sex == "Total"), , drop = FALSE] ## data error
+  data <- data[data$country != "Malaysia", , drop = FALSE] ## data error
+  data <- data[!(data$country == "Mongolia" &
+                   data$time == 2010), , drop = FALSE] ## data error
+  data <- data[!(data$country == "Nepal" &
+                   data$time == 2021), , drop = FALSE] ## data error
+  data <- data[!(data$country == "Pakistan" &
+                   data$time == 2017), , drop = FALSE] ## data error
+  data <- data[!(data$country == "Qatar" &
+                   data$time == 2004), , drop = FALSE] ## data error
   data$school <- gsub(" ", ".", data$school)
   data$school <- tolower(data$school)
   data <- as.data.frame(data)
@@ -190,14 +213,66 @@ tidy_csa <- function(data) {
   data
 }
 
+
+
+## Internal functions ---------------------------------------------------------
+
 ## HAS_TESTS
-#' Make Age Labels Used by CSA
+#' Obtain the Scaled 'U' Matrix From an SVD of
+#' Census School Attendance Data 
 #'
-#' @returns List of character vectors
+#' @param data A data frame, typically produced by 'tidy_wmd'.
+#' @param n_comp Number of components.
+#' @param eps Truncation parameter
+#'
+#' @returns A tibble
+#' 
+#' @noRd
+csa_calculate_coef <- function(data, n_comp, eps) {
+  calculate_coef_sex(data = data,
+                     n_comp = n_comp,
+                     transform = "logit",
+                     eps = eps)
+}
+
+
+## HAS_TESTS
+#' Prepare Inputs for "indep" Type, ie Female and Male Separate
+#'
+#' @param data A data frame
+#' @param labels_age List of character vectors
+#' @param n_comp Numbers of SVD components
+#' @param eps Truncation parameter
+#'
+#' @returns A data frame
+#' 
+#' @noRd
+csa_indep <- function(data, labels_age, n_comp, eps) {
+  make_indep(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
+}
+
+
+## HAS_TESTS
+#' Prepare Inputs for "joint" Type, ie Female and Male Concatenated
+#'
+#' @param data A data frame
+#' @param labels_age List of character vectors
+#' @param n_comp Numbers of SVD components
+#' @param eps Truncation parameter
+#'
+#' @returns A data frame
 #'
 #' @noRd
-csa_make_labels_age <- function() {
-  lapply(15:24, function(i) seq.int(from = 5L, to = i))
+csa_joint <- function(data, labels_age, n_comp, eps) {
+  make_joint(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
 }
 
 
@@ -213,26 +288,20 @@ csa_make_labels_age <- function() {
 #'
 #' @noRd
 csa_total <- function(data, labels_age, n_comp, eps) {
-  data <- data[data$sex == "Total", ]
-  data_split <- .mapply(get_data_one,
-                        dots = list(labels_age = labels_age),
-                        MoreArgs = list(data = data))
-  x_split <- .mapply(poputils::to_matrix,
-                     dots = list(x = data_split),
-                     MoreArgs = list(rows = "age",
-                                     cols = c("country", "time"),
-                                     measure = "value"))
-  x_split <- lapply(x_split, remove_cols_with_na, n_comp = n_comp)
-  ssvd_split <- lapply(x_split,
-                       make_matrix_and_offset,
-                       transform = "logit",
-                       n_comp = n_comp,
-                       eps = eps)
-  matrix <- lapply(ssvd_split, function(x) x$matrix)
-  offset <- lapply(ssvd_split, function(x) x$offset)
-  tibble::tibble(type = "total",
-                 labels_age = labels_age,
-                 labels_sexgender = list(NULL),
-                 matrix = matrix,
-                 offset = offset)
+  make_total(data = data,
+             labels_age = labels_age,
+             n_comp = n_comp,
+             transform = "logit",
+             eps = eps)
+}
+
+
+## HAS_TESTS
+#' Make Age Labels Used by CSA
+#'
+#' @returns List of character vectors
+#'
+#' @noRd
+csa_make_labels_age <- function() {
+  lapply(14:24, function(i) seq.int(from = 5L, to = i))
 }
