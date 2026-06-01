@@ -1,4 +1,6 @@
 
+## User-visible ---------------------------------------------------------------
+
 ## HAS_TESTS
 #' Obtain Coefficients from Scaled SVD of HMD Data
 #'
@@ -9,45 +11,64 @@
 #' scaled version of the \eqn{U} matrix
 #' from the SVD.
 #'
+#' @section Truncation and transformation:
+#'
+#' Rates below `eps` are shifted to `eps`,
+#' and all rates are log-transformed,
+#' before the SVD is applied. 
+#'
 #' @param zipfile The name of a zipped file downloaded
 #' from the Human Mortality Database.
 #' A path name that is handled by [utils::unzip()].
 #' @param n_comp Number of SVD components
 #' to include in result. Default is `5`.
+#' @param date Date on which data produced.
+#' Choices are `"2025-09-25"`, `"2024-02-26"`.
+#' (Class is character, not Date.)
+#' @param year_min Only include data for
+#' `year_min` onwards. Ignored if
+#' `year_min` is `NULL` (the default).
+#' @param eps Floor for rates.
+#' Default is `0.00001`.
 #'
 #' @returns A tibble
 #'
 #' @seealso
-#' - [data_ssvd_hmd()] Prepare data on fertility
+#' - [data_ssvd_hmd()] Put data
 #'   from the Human Mortality Database
-#' - [coef_hfd()] Obtain coefficients
-#'   for Human Fertility Database data
-#' - [coef_lfp()] Obtain coefficients
-#'   for OECD Labor Force Participation data
+#'   into the format required by
+#'   the `ssvd()` function in \pkg{bage}
+#' - [tidy_hmd()] Format data from the
+#'   Human Mortality Database into
+#'   a tidy data frame
 #'
 #' @examples
-#' if (requireNamespace("bssvd", quietly = TRUE)) {
-#'   zipfile <- system.file("extdata",
-#'                          "hmd_statistics_subset.zip",
-#'                          package = "bssvd")
-#'   if (nzchar(zipfile) && file.exists(zipfile)) {
-#'     coef_hmd(zipfile)
-#'   }
-#' }
+#' zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
+#'                        package = "bssvd")
+#' coef_hmd(zipfile)
 #' @export
-coef_hmd <- function(zipfile, n_comp = 5) {
+coef_hmd <- function(zipfile,
+                     n_comp = 5,
+                     date = c("2025-09-25",
+                              "2024-02-26"),
+                     year_min = NULL,
+                     eps = 0.00001) {
   check_n(n = n_comp,
           nm_n = "n_comp",
           min = 3L,
           max = 10L,
           divisible_by = 1L)
   n_comp <- as.integer(n_comp)
-  cli::cli_progress_message("Unzipping file...")
-  data <- hmd_unzip(zipfile)
-  cli::cli_progress_message("Tidying data...")
-  data <- hmd_tidy_data(data)
-  cli::cli_progress_message("Calculating coefficients...")
-  hmd_calculate_coef(data = data, n_comp = n_comp)
+  date <- match.arg(date)
+  check_year_min(year_min)
+  check_eps(eps)
+  data <- hmd_unzip(zipfile = zipfile,
+                    date = date)
+  data <- hmd_tidy_data(data = data,
+                        year_min = year_min)
+  hmd_calculate_coef(data = data,
+                     n_comp = n_comp,
+                     eps = eps)
 }
 
 
@@ -76,49 +97,111 @@ coef_hmd <- function(zipfile, n_comp = 5) {
 #' ```
 #' hmd_data <- data_ssvd_hmd("hmd_statistcs_20240226")
 #' ```
+#' @inheritSection coef_hmd Truncation and transformation
 #'
 #' @inheritParams coef_hmd
 #'
 #' @returns A tibble
 #'
 #' @seealso
-#' - [data_ssvd_hfd()] Prepare data on fertility
-#'   from the Human Fertility Database
-#' - [data_ssvd_lfp()] Prepare data on labour force participation
-#'   from the OCED
+#' - [coef_hfd()] Obtain time series
+#'   of SVD coefficients
+#'   for Human Mortality Database data
+#' - [tidy_hmd()] Format data from the
+#'   Human Mortality Database into
+#'   a tidy data frame
 #' 
 #' @examples
-#' zipfile <- system.file("extdata", "hmd_statistics_subset.zip",
+#' zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
 #'                        package = "bssvd")
 #' data <- data_ssvd_hmd(zipfile)
 #' data
 #' @export
-data_ssvd_hmd <- function(zipfile, n_comp = 5) {
+data_ssvd_hmd <- function(zipfile,
+                          n_comp = 5,
+                          date = c("2025-09-25",
+                                   "2024-02-26"),
+                          year_min = NULL,
+                          eps = 0.00001) {
   poputils::check_n(n = n_comp,
                     nm_n = "n_comp",
                     min = 3L,
                     max = 10L,
                     divisible_by = NULL)
+  check_eps(eps)
   n_comp <- as.integer(n_comp)
+  date <- match.arg(date)
+  check_year_min(year_min)
   cli::cli_progress_message("Unzipping file...")
-  data <- hmd_unzip(zipfile)
+  data <- hmd_unzip(zipfile = zipfile, date = date)
   cli::cli_progress_message("Tidying data...")
-  data <- hmd_tidy_data(data)
+  data <- hmd_tidy_data(data = data, year_min = year_min)
   cli::cli_progress_message("Creating five-year age groups...")
   data <- hmd_add_age_five(data)
   cli::cli_progress_message("Assembling datasets for alternative open age groups...")
   data <- hmd_vary_age_open(data)
   cli::cli_progress_message("Carrying out SVD for 'total'...")
-  total <- hmd_total(data, n_comp = n_comp)
+  total <- hmd_total(data, n_comp = n_comp, eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'indep'...")
-  indep <- hmd_indep(data, n_comp = n_comp)
+  indep <- hmd_indep(data, n_comp = n_comp, eps = eps)
   cli::cli_progress_message("Carrying out SVD for 'joint'...")
-  joint <- hmd_joint(data, n_comp = n_comp)
+  joint <- hmd_joint(data, n_comp = n_comp, eps = eps)
   cli::cli_progress_message("Combining results...")
   data <- vctrs::vec_rbind(total, indep, joint)
   data <- tibble::as_tibble(data)
   data
-}  
+}
+
+
+## HAS_TESTS
+#' Tidy HMD Age-Specific Mortality Data
+#'
+#' Put data on age-specific mortality rates
+#' from a zipped file downloaded from the
+#' [Human Mortality Database](https://www.mortality.org/Data/ZippedDataFiles)
+#' into a tidy data frame.
+#'
+#' @inheritParams coef_hmd
+#'
+#' @returns A tibble
+#'
+#' @seealso
+#' - [data_ssvd_hmd()] Put data
+#'   from the Human Mortality Database
+#'   into the format required by
+#'   the `ssvd()` function in \pkg{bage}
+#' - [coef_hmd()] Obtain time series
+#'   of SVD coefficients
+#'   for Human Mortality Database data
+#'
+#' @examples
+#' zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
+#'                        package = "bssvd")
+#' tidy_hmd(zipfile)
+#' tidy_hmd(zipfile,
+#'          date = "2025-09-25",
+#'          year_min = 1950)
+#' @export
+tidy_hmd <- function(zipfile,
+                     date = c("2025-09-25",
+                              "2024-02-26"),
+                     year_min = NULL) {
+  date <- match.arg(date)
+  if (!is.null(year_min))
+    check_n(n = year_min,
+            nm_n = "year_min",
+            min = 0L,
+            max = 3000L,
+            divisible_by = 1L)
+  data <- hmd_unzip(zipfile = zipfile, date = date)
+  data <- hmd_tidy_data(data = data, year_min = year_min)
+  data <- tibble::tibble(data)
+  data
+}
+
+
+
+## Internal -------------------------------------------------------------------
 
 
 ## HAS_TESTS
@@ -179,40 +262,18 @@ hmd_aggregate_mx_Lx <- function(data) {
 #'
 #' @param data A data frame, typically produced by 'hmd_tidy'.
 #' @param n_comp Number of components.
+#' @param eps Floor for rates
 #'
 #' @returns A tibble
 #' 
 #' @noRd
-hmd_calculate_coef <- function(data, n_comp) {
+hmd_calculate_coef <- function(data, n_comp, eps) {
   data <- data[data$type_age == "single", , drop = FALSE]
-  data$age <- poputils::reformat_age(data$age)
-  ord <- with(data, order(sex, country, time, age))
-  data <- data[ord, , drop = FALSE]
-  data <- vctrs::vec_split(data[c("country", "time", "age", "mx")], data["sex"])
-  ans <- lapply(data$val,
-                poputils::to_matrix,
-                rows = "age",
-                cols = c("country", "time"),
-                measure = "mx")
-  ans <- lapply(ans, remove_cols_with_na, n_comp = n_comp)
-  ans <- lapply(ans, replace_zeros)
-  ans <- lapply(ans, log)
-  country_time <- lapply(ans, colnames)
-  ans <- lapply(ans, function(x) svd(x, nu = 0L, nv = n_comp)$v)
-  ans <- lapply(ans, scale, center = TRUE, scale = TRUE)
-  for (i in seq_along(ans)) {
-    dimnames(ans[[i]]) <- list(country_time = country_time[[i]],
-                               component = paste("Component", seq_len(n_comp)))
-    ans[[i]] <- as.data.frame.table(ans[[i]], responseName = "coef", stringsAsFactors = FALSE)
-    ans[[i]]$sex <- data$key$sex[[i]]
-  }
-  ans <- vctrs::vec_rbind(!!!ans)
-  p <- "^(.*)\\.(.*)$"
-  ans$country <- sub(p, "\\1", ans$country_time)
-  ans$time <- as.integer(sub(p, "\\2", ans$country_time))
-  ans <- ans[c("sex", "country", "time", "component", "coef")]
-  ans <- tibble::tibble(ans)
-  ans
+  names(data)[match("mx", names(data))] <- "value"
+  calculate_coef_sex(data = data,
+                     n_comp = n_comp,
+                     transform = "log",
+                     eps = eps)
 }
 
 
@@ -220,11 +281,13 @@ hmd_calculate_coef <- function(data, n_comp) {
 #' Prepare Inputs for "indep" Type, ie Female and Male Modelled Separately
 #'
 #' @param data A data frame
+#' @param n_comp Number of components
+#' @param eps Floor for rates
 #'
 #' @returns A data frame
 #'
 #' @noRd
-hmd_indep <- function(data, n_comp) {
+hmd_indep <- function(data, n_comp, eps) {
   data <- data[data$sex != "Total", ]
   data <- vctrs::vec_split(x = data[c("age", "country", "time", "mx")],
                            by = data[c("type_age", "age_open", "sex")])
@@ -242,7 +305,8 @@ hmd_indep <- function(data, n_comp) {
   l <- lapply(x,
               make_matrix_and_offset,
               transform = "log",
-              n_comp = n_comp)
+              n_comp = n_comp,
+              eps = eps)
   matrix <- lapply(l, function(x) x$matrix)
   offset <- lapply(l, function(x) x$offset)
   labels_sexgender <- .mapply(rep.int,
@@ -281,11 +345,12 @@ hmd_indep <- function(data, n_comp) {
 #' @param data A data frame
 #' @param n_comp Number of SVD components
 #' to include in result.
+#' @param eps Floor for rates
 #'
 #' @returns A data frame
 #'
 #' @noRd
-hmd_joint <- function(data, n_comp) {
+hmd_joint <- function(data, n_comp, eps) {
   data <- data[data$sex != "Total", ]
   data <- vctrs::vec_split(x = data[c("age", "sex", "country", "time", "mx")],
                            by = data[c("type_age", "age_open")])
@@ -304,7 +369,8 @@ hmd_joint <- function(data, n_comp) {
   l <- lapply(x,
               make_matrix_and_offset,
               transform = "log",
-              n_comp = n_comp)
+              n_comp = n_comp,
+              eps = eps)
   matrix <- lapply(l, function(x) x$matrix)
   offset <- lapply(l, function(x) x$offset)
   rn <- lapply(matrix, rownames)
@@ -323,18 +389,23 @@ hmd_joint <- function(data, n_comp) {
 #' Tidy Raw HMD data
 #'
 #' Steps:
+#' - rename "PopName" to "country"
 #' - rename "Age" to "age"
 #' - rename "Year" to "time"
 #' - change levels for 'sex' variable to "Total", "Female", "Male"
 #' - exclude any country-time combinations that have
 #'   NAs for 'mx' or 'Lx'
+#' - subset to time >= year_min, if year_min non-NULL
 #'
 #' @param data A data fame with raw HMD data
 #'
 #' @returns A cleaned data frame
 #'
 #' @noRd
-hmd_tidy_data <- function(data) {
+hmd_tidy_data <- function(data, year_min) {
+  i_pop <- match("PopName", names(data), nomatch = 0L)
+  if (i_pop > 0L)
+    names(data)[[i_pop]] <- "country"
   names(data)[[match("Age", names(data))]] <- "age"
   names(data)[[match("Year", names(data))]] <- "time"
   data$sex <- factor(data$sex,
@@ -352,6 +423,8 @@ hmd_tidy_data <- function(data) {
                 sort = FALSE)
   data <- data[!data$has_na, ]
   data <- data[-match("has_na", names(data))]
+  if (!is.null(year_min))
+    data <- data[data$time >= year_min, , drop = FALSE]
   data
 }
 
@@ -362,11 +435,12 @@ hmd_tidy_data <- function(data) {
 #' @param data A data frame
 #' @param n_comp Number of SVD components
 #' to include in result.
+#' @param eps Floor for rates
 #'
 #' @returns A data frame
 #'
 #' @noRd
-hmd_total <- function(data, n_comp) {
+hmd_total <- function(data, n_comp, eps) {
   data <- data[data$sex == "Total", ]
   data <- vctrs::vec_split(x = data[c("age", "country", "time", "mx")],
                            by = data[c("type_age", "age_open")])
@@ -384,7 +458,8 @@ hmd_total <- function(data, n_comp) {
   l <- lapply(x,
               make_matrix_and_offset,
               transform = "log",
-              n_comp = n_comp)
+              n_comp = n_comp,
+              eps = eps)
   matrix <- lapply(l, function(x) x$matrix)
   offset <- lapply(l, function(x) x$offset)
   labels_age <- lapply(matrix, rownames)
@@ -403,20 +478,44 @@ hmd_total <- function(data, n_comp) {
 #' https://www.mortality.org/Data/ZippedDataFiles
 #' 
 #' @param file Name of zipped HMD file
+#' @param date Date on which
+#' data published.
 #'
 #' @returns A tibble
 #'
 #' @noRd
-hmd_unzip <- function(zipfile) {
+hmd_unzip <- function(zipfile, date) {
+  if (date == "2024-02-26")
+    hmd_unzip_v1(zipfile)
+  else if (date == "2025-09-25")
+    hmd_unzip_v2(zipfile)
+  else
+    cli::cli_abort("Internal error: Invalid date")
+}
+
+
+## HAS_TESTS
+#' Convert a Zipped HMD, 2024-02-26 version,
+#' into a Combined Data Frame
+#'
+#' Zipped HMD file obtained from
+#' https://www.mortality.org/Data/ZippedDataFiles
+#' 
+#' @param file Name of zipped HMD file
+#'
+#' @returns A tibble
+#'
+#' @noRd
+hmd_unzip_v1 <- function(zipfile) {
   dirs <- c("lt_both/bltper_1x1",
             "lt_both/bltper_5x1",
             "lt_female/fltper_1x1",
             "lt_female/fltper_5x1",
             "lt_male/mltper_1x1",
             "lt_male/mltper_5x1")
-  ## tmp_dir <- tempdir()
-  tmp_dir <- file.path(getwd(), "tmp_unzip")
-  dir.create(tmp_dir, showWarnings = FALSE)
+  tmp_dir <- tempfile("hmd_")
+  dir.create(tmp_dir)
+  on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
   utils::unzip(zipfile, exdir = tmp_dir)
   get_data <- function(dir) {
     country_code <- sub("([A-Z]+)\\..*", "\\1", list.files(dir))
@@ -462,6 +561,56 @@ hmd_unzip <- function(zipfile) {
   ans <- lapply(dirs_unpacked, get_data)
   ans <- do.call(rbind, ans)
   on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
+  ans
+}
+
+
+## HAS_TESTS
+#' Convert a Zipped HMD, 2025-09-25 version,
+#' into a Combined Data Frame
+#'
+#' Zipped HMD file obtained from
+#' https://www.mortality.org/Data/ZippedDataFiles
+#' 
+#' @param file Name of zipped HMD file
+#'
+#' @returns A tibble
+#'
+#' @noRd
+hmd_unzip_v2 <- function(zipfile) {
+  files <- c("lt_both/bltper_1x1/bltper_1x1.txt",
+             "lt_both/bltper_5x1/bltper_5x1.txt",
+             "lt_female/fltper_1x1/fltper_1x1.txt",
+             "lt_female/fltper_5x1/fltper_5x1.txt",
+             "lt_male/mltper_1x1/mltper_1x1.txt",
+             "lt_male/mltper_5x1/mltper_5x1.txt")
+  tmp_dir <- tempfile("hmd_")
+  dir.create(tmp_dir)
+  on.exit(unlink(tmp_dir, recursive = TRUE), add = TRUE)
+  utils::unzip(zipfile, exdir = tmp_dir)
+  paths <- list.files(tmp_dir, full.names = TRUE, recursive = TRUE)
+  p <- paste(files, collapse = "|")
+  paths <- grep(p, paths, value = TRUE)
+  get_data <- function(path) {
+    sex <- sub(".*lt_([a-z]+).*", "\\1", path)
+    type_age <- sub(".*ltper_([1x5]+).*", "\\1", path)
+    ans <- utils::read.table(path,
+                             header = TRUE,
+                             colClasses = c("character",
+                                            "integer",
+                                            "character",
+                                            "double",
+                                            rep("NULL", 4L),
+                                            "integer",
+                                            rep("NULL", 2L)),
+                             na.strings = ".",
+                             skip = 2L)
+    ans$sex <- sex
+    ans$type_age <- type_age
+    ans
+  }
+  ans <- lapply(paths, get_data)
+  ans <- do.call(rbind, ans)
   ans
 }
 

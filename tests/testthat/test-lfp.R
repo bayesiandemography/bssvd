@@ -12,11 +12,30 @@ test_that("'coef_lfp' works with valid inputs", {
 
 ## 'data_ssvd_lfp' ------------------------------------------------------------
 
-test_that("'ssvd_lfp' works with valid inputs", {
+test_that("'data_ssvd_lfp' works with valid inputs", {
   suppressMessages(data <- data_ssvd_lfp(oecd_lfp_subset, age_max = 65))
   expect_true(tibble::is_tibble(data))
-  ## ans <- bage::ssvd(data)
-  ## expect_s3_class(ans, "bage_ssvd")
+  data$version <- "v1"
+  ans <- bage::ssvd(data)
+  expect_s3_class(ans, "bage_ssvd")
+})
+
+
+## 'tidy_lfp' --------------------------------------------------------
+
+test_that("'tidy_lfp' works with valid inputs - no year_min", {
+  ans <- tidy_lfp(oecd_lfp_subset)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+})
+
+test_that("'tidy_lfp' works with valid inputs - has year_min", {
+  ans <- tidy_lfp(oecd_lfp_subset, year_min = 2011)
+  expect_setequal(names(ans),
+                  c("country", "sex", "age", "time", "value"))
+  expect_true(tibble::is_tibble(ans))
+  expect_true(all(ans$time >= 2011))
 })
 
 
@@ -31,23 +50,9 @@ test_that("'lfp_calculate_coef' works with valid inputs", {
                                                  open = TRUE),
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
-  ans_obtained <- lfp_calculate_coef(data, n_comp = 5)
+  ans_obtained <- lfp_calculate_coef(data, n_comp = 5, eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("sex", "country", "time", "component", "coef"))
-})
-
-
-## 'lfp_get_data_one' ---------------------------------------------------------
-
-test_that("'lfp_get_data_one' works", {
-  data <- data.frame(age = c("25-29", "20-24", "30-34", "30+"),
-                     val = 1:4)
-  labels_age <- c("20-24", "25-29", "30+")
-  ans_obtained <- lfp_get_data_one(data = data,
-                                   labels_age = labels_age)
-  ans_expected <- data.frame(age = factor(c("20-24", "25-29", "30+")),
-                             val = c(2L, 1L, 4L))
-  expect_identical(ans_obtained, ans_expected)
 })
 
 
@@ -64,7 +69,8 @@ test_that("'lfp_indep' works with valid inputs", {
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
-  ans_obtained <- lfp_indep(data, labels_age = labels_age, n_comp = 5)
+  ans_obtained <- lfp_indep(data, labels_age = labels_age, n_comp = 5,
+                            eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
@@ -88,7 +94,8 @@ test_that("'lfp_joint' works with valid inputs", {
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
-  ans_obtained <- lfp_joint(data, labels_age = labels_age, n_comp = 5)
+  ans_obtained <- lfp_joint(data, labels_age = labels_age, n_comp = 5,
+                            eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
@@ -113,26 +120,17 @@ test_that("'lfp_make_labels_age' works", {
 })
 
 
-## 'lfp_tidy' --------------------------------------------------------
-
-test_that("'lfp_tidy' works with valid inputs", {
-  ans <- lfp_tidy(oecd_lfp_subset)
-  expect_setequal(names(ans),
-                  c("country", "sex", "age", "time", "value"))
-  expect_true(tibble::is_tibble(ans))
-})
-
-test_that("'lfp_tidy' throws correct error when variable missing", {
+test_that("'tidy_lfp' throws correct error when variable missing", {
   data <- oecd_lfp_subset
   data <- data[-match("REF_AREA", names(data))]
-  expect_error(lfp_tidy(data),
+  expect_error(tidy_lfp(data),
                "`data` does not have a column called \"REF_AREA\"")
 })
 
-test_that("'lfp_tidy' throws correct error when data has invalid sex label", {
+test_that("'tidy_lfp' throws correct error when data has invalid sex label", {
   data <- oecd_lfp_subset
   data$SEX[3] <- "wrong"
-  expect_error(lfp_tidy(data),
+  expect_error(tidy_lfp(data),
                "Invalid value for `sex`: \"wrong\"")
 })
 
@@ -150,7 +148,8 @@ test_that("'lfp_total' works with valid inputs", {
                       time = 2001:2005)
   data$value <- runif(n = nrow(data))
   labels_age <- lfp_make_labels_age(data = data, age_max = 65)
-  ans_obtained <- lfp_total(data, labels_age = labels_age, n_comp = 5)
+  ans_obtained <- lfp_total(data, labels_age = labels_age, n_comp = 5,
+                            eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))

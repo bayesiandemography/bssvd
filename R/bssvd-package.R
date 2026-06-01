@@ -11,21 +11,35 @@
 #'
 #' @section Human Fertility Database:
 #'
-#' - [data_ssvd_hfd()] Prepare HFD data to created scaled SVD object
-#' - [hfd_tidy()] Initial tidying of HFD data
-#' - [coef_hfd()] Extract coef from scaled SVD of HFD data
+#' Sample data:
+#' 
 #' - [asfr_subset()] Subset of HFD data
+#'
+#' Functions:
+#' 
+#' - [data_ssvd_hfd()] Prepare HFD data to created scaled SVD object
+#' - [tidy_hfd()] Initial tidying of HFD data
+#' - [coef_hfd()] Extract coef from scaled SVD of HFD data
 #'
 #' @section Human Mortality Database:
 #'
+#' Functions:
+#' 
 #' - [data_ssvd_hmd()] Prepare HMD data to created scaled SVD object
+#' - [tidy_hmd()] Initial tidying of HMD data
 #' - [coef_hmd()] Extract coef from scaled SVD of HMD data
 #'
 #' @section OECD Labour Force Participation data:
 #'
-#' - [data_ssvd_lfp()] Prepare labour force data to created scaled-SVD object
-#' - [coef_lfp()] Extract coef from scaled SVD of labour force data
+#' Sample data:
+#'
 #' - [oecd_lfp_subset()] Subset of labour force data
+#'
+#' Functions:
+#' 
+#' - [data_ssvd_lfp()] Prepare labour force data to created scaled-SVD object
+#' - [tidy_lfp()] Initial tidying of LFP data
+#' - [coef_lfp()] Extract coef from scaled SVD of labour force data
 #'
 #' @section General purpose functions:
 #'

@@ -16,28 +16,44 @@ by developers, not data analysts.
 }
 \section{Human Fertility Database}{
 
+
+Sample data:
+\itemize{
+\item \code{\link[=asfr_subset]{asfr_subset()}} Subset of HFD data
+}
+
+Functions:
 \itemize{
 \item \code{\link[=data_ssvd_hfd]{data_ssvd_hfd()}} Prepare HFD data to created scaled SVD object
-\item \code{\link[=hfd_tidy]{hfd_tidy()}} Initial tidying of HFD data
+\item \code{\link[=tidy_hfd]{tidy_hfd()}} Initial tidying of HFD data
 \item \code{\link[=coef_hfd]{coef_hfd()}} Extract coef from scaled SVD of HFD data
-\item \code{\link[=asfr_subset]{asfr_subset()}} Subset of HFD data
 }
 }
 
 \section{Human Mortality Database}{
 
+
+Functions:
 \itemize{
 \item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare HMD data to created scaled SVD object
+\item \code{\link[=tidy_hmd]{tidy_hmd()}} Initial tidying of HMD data
 \item \code{\link[=coef_hmd]{coef_hmd()}} Extract coef from scaled SVD of HMD data
 }
 }
 
 \section{OECD Labour Force Participation data}{
 
+
+Sample data:
+\itemize{
+\item \code{\link[=oecd_lfp_subset]{oecd_lfp_subset()}} Subset of labour force data
+}
+
+Functions:
 \itemize{
 \item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Prepare labour force data to created scaled-SVD object
+\item \code{\link[=tidy_lfp]{tidy_lfp()}} Initial tidying of LFP data
 \item \code{\link[=coef_lfp]{coef_lfp()}} Extract coef from scaled SVD of labour force data
-\item \code{\link[=oecd_lfp_subset]{oecd_lfp_subset()}} Subset of labour force data
 }
 }
 
@@ -57,6 +73,11 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: John Bryant \email{john@bayesiandemography.com}
+
+Authors:
+\itemize{
+  \item John Bryant \email{john@bayesiandemography.com}
+}
 
 }
 \keyword{internal}

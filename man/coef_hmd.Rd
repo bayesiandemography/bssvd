@@ -4,7 +4,13 @@
 \alias{coef_hmd}
 \title{Obtain Coefficients from Scaled SVD of HMD Data}
 \usage{
-coef_hmd(zipfile, n_comp = 5)
+coef_hmd(
+  zipfile,
+  n_comp = 5,
+  date = c("2025-09-25", "2024-02-26"),
+  year_min = NULL,
+  eps = 1e-05
+)
 }
 \arguments{
 \item{zipfile}{The name of a zipped file downloaded
@@ -13,6 +19,17 @@ A path name that is handled by \code{\link[utils:unzip]{utils::unzip()}}.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{date}{Date on which data produced.
+Choices are \code{"2025-09-25"}, \code{"2024-02-26"}.
+(Class is character, not Date.)}
+
+\item{year_min}{Only include data for
+\code{year_min} onwards. Ignored if
+\code{year_min} is \code{NULL} (the default).}
+
+\item{eps}{Floor for rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -25,23 +42,27 @@ The coefficients are a
 scaled version of the \eqn{U} matrix
 from the SVD.
 }
-\examples{
-if (requireNamespace("bssvd", quietly = TRUE)) {
-  zipfile <- system.file("extdata",
-                         "hmd_statistics_subset.zip",
-                         package = "bssvd")
-  if (nzchar(zipfile) && file.exists(zipfile)) {
-    coef_hmd(zipfile)
-  }
+\section{Truncation and transformation}{
+
+
+Rates below \code{eps} are shifted to \code{eps},
+and all rates are log-transformed,
+before the SVD is applied.
 }
+
+\examples{
+zipfile <- system.file("extdata", "hmd_statistics_20250925_subset.zip",
+                       package = "bssvd")
+coef_hmd(zipfile)
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on fertility
+\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Put data
 from the Human Mortality Database
-\item \code{\link[=coef_hfd]{coef_hfd()}} Obtain coefficients
-for Human Fertility Database data
-\item \code{\link[=coef_lfp]{coef_lfp()}} Obtain coefficients
-for OECD Labor Force Participation data
+into the format required by
+the \code{ssvd()} function in \pkg{bage}
+\item \code{\link[=tidy_hmd]{tidy_hmd()}} Format data from the
+Human Mortality Database into
+a tidy data frame
 }
 }

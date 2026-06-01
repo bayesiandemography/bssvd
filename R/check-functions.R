@@ -1,5 +1,29 @@
 
 ## HAS_TESTS
+#' Check that 'eps' is Positive Non-NA Finite Numeric Scalar
+#'
+#' @param eps A numeric scalar
+#'
+#' @returns TRUE, invisibly
+#' 
+#' @noRd
+check_eps <- function(eps) {
+  if (!is.numeric(eps))
+    cli::cli_abort(c("{.arg eps} is non-numeric.",
+                     i = "{.arg eps} has class {.cls {class(eps)}}."))
+  if (length(eps) != 1L)
+    cli::cli_abort("{.arg eps} does not have length 1.")
+  if (is.na(eps))
+    cli::cli_abort("{.arg eps} is {.val {NA}}.")
+  if (is.infinite(eps))
+    cli::cli_abort("{.arg eps} is non-finite.")
+  if (eps <= 0)
+    cli::cli_abort("{.arg eps} is non-positive.")
+  invisible(TRUE)
+}
+
+
+## HAS_TESTS
 #' Check that an Object is a Matrix
 #'
 #' @param x An object
@@ -75,3 +99,23 @@ check_numeric <- function(x, nm_x) {
     cli::cli_abort("{.arg {nm_x}} has non-finite value.")
   invisible(TRUE)
 }
+
+## HAS_TESTS
+#' Check that 'year_min is Valid
+#'
+#' @param year_min Minimum year for data
+#'
+#' @returns TRUE, invisibly
+#' 
+#' @noRd
+check_year_min <- function(year_min) {
+  if (!is.null(year_min)) {
+    check_n(n = year_min,
+            nm_n = "year_min",
+            min = 1500L,
+            max = 2050L,
+            divisible_by = 1L)
+  }
+  invisible(TRUE)
+}
+  

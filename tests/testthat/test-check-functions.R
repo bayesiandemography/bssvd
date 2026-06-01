@@ -1,4 +1,39 @@
 
+## 'check_eps' ----------------------------------------------------------------
+
+test_that("'check_eps' returns TRUE with valid inputs", {
+    expect_true(check_eps(0.001))
+    expect_true(check_eps(eps = 0.000000001))
+})
+
+test_that("'check_eps' throws correct error with non-numeric", {
+    expect_error(check_eps("4"),
+                 "`eps` is non-numeric")
+})
+
+test_that("'check_eps' throws correct error with 0 length", {
+    expect_error(check_eps(integer()),
+                 "`eps` does not have length 1")
+})
+
+test_that("'check_eps' throws correct error with NA", {
+    expect_error(check_eps(NA_real_),
+                 "`eps` is NA")
+})
+
+test_that("'check_eps' throws correct error with Inf", {
+    expect_error(check_eps(Inf),
+                 "`eps` is non-finite.")
+})
+
+test_that("'check_eps' throws correct error with non-positive", {
+    expect_error(check_eps(0),
+                 "`eps` is non-positive.")
+    expect_error(check_eps(-1),
+                 "`eps` is non-positive.")
+})
+
+
 ## 'check_is_matrix' ----------------------------------------------------------
 
 test_that("'check_is_matrix' works with valid inputs", {
@@ -60,8 +95,7 @@ test_that("'check_n' throws correct error when not divisible by 'divisible_by'",
 })
 
 
-
-## 'check_numeric' ------------------------------------------------------------------
+## 'check_numeric' ------------------------------------------------------------
 
 test_that("'check_numeric' returns TRUE with valid inputs", {
     expect_true(check_numeric(x = 1:4, nm_x = "x"))
@@ -86,4 +120,15 @@ test_that("'check_numeric' throws correct error with NA", {
 test_that("'check_numeric' throws correct error with Inf", {
     expect_error(check_numeric(x = c(100, -1, Inf), nm_x = "x"),
                  "`x` has non-finite value.")
+})
+
+
+## 'check_year_min' -----------------------------------------------------------
+
+test_that("'check_year_min' returns TRUE with NULL", {
+  expect_true(check_year_min(NULL))
+})
+
+test_that("'check_year_min' returns TRUE with valid year", {
+  expect_true(check_year_min(2000))
 })

@@ -1,24 +1,64 @@
 
 ## 'coef_hmd' -----------------------------------------------------------------
 
-test_that("'coef_hmd' works with valid inputs", {
-  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
-  suppressMessages(ans <- coef_hmd(fn))
+test_that("'coef_hmd' works with 2024 data", {
+  fn <- system.file("extdata", "hmd_statistics_20240226_subset.zip", package = "bssvd")
+  suppressMessages(ans <- coef_hmd(fn, date = "2024-02-26"))
   expect_true(tibble::is_tibble(ans))
   expect_setequal(names(ans),
                   c("sex", "country", "time", "component", "coef"))
   expect_equal(mean(ans$coef), 0)
 })
 
+test_that("'coef_hmd' works with 2025 data", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  suppressMessages(ans <- coef_hmd(fn, date = "2025-09-25", year_min = 1950))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+  expect_true(all(ans$time >= 1950))
+})
+
 
 ## 'data_ssvd_hmd' -----------------------------------------------------------------
 
-test_that("'data_ssvd_hmd' works with valid inputs", {
-  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
-  suppressMessages(data <- data_ssvd_hmd(fn))
+test_that("'data_ssvd_hmd' works with 2024 data", {
+  fn <- system.file("extdata", "hmd_statistics_20240226_subset.zip", package = "bssvd")
+  suppressMessages(data <- data_ssvd_hmd(fn, date = "2024-02-26"))
   expect_true(tibble::is_tibble(data))
   ## ans <- bage::ssvd(data)
   ## expect_s3_class(ans, "bage_ssvd")
+})
+
+test_that("'data_ssvd_hmd' works with 2025 data", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  suppressMessages(data <- data_ssvd_hmd(fn, date = "2025-09-25", year_min = 1970))
+  expect_true(tibble::is_tibble(data))
+  ## ans <- bage::ssvd(data)
+  ## expect_s3_class(ans, "bage_ssvd")
+})
+
+
+## 'tidy_hmd' -----------------------------------------------------------------
+
+test_that("'tidy_hmd' works with 2024 data", {
+  fn <- system.file("extdata", "hmd_statistics_20240226_subset.zip", package = "bssvd")
+  suppressMessages(ans <- tidy_hmd(fn, date = "2024-02-26", year_min = 1990))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "type_age", "age",
+                    "mx", "Lx"))
+  expect_true(all(ans$time >= 1990))
+})
+
+test_that("'tidy_hmd' works with 2025 data", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  suppressMessages(ans <- tidy_hmd(fn, date = "2025-09-25"))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "type_age", "age",
+                    "mx", "Lx"))
 })
 
 
@@ -75,7 +115,7 @@ test_that("'hmd_calculate_coef' works with valid inputs", {
                       type_age = "single",
                       age_open = 45)
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_calculate_coef(data, n_comp = 5)
+  ans_obtained <- hmd_calculate_coef(data, n_comp = 5, eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("sex", "country", "time", "component", "coef"))
   expect_equal(mean(ans_obtained$coef), 0)
@@ -99,7 +139,7 @@ test_that("'hmd_indep' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_indep(data, n_comp = 5)
+  ans_obtained <- hmd_indep(data, n_comp = 5, eps = 0.001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
@@ -128,7 +168,7 @@ test_that("'hmd_joint' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_joint(data, n_comp = 10)
+  ans_obtained <- hmd_joint(data, n_comp = 10, eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
@@ -142,13 +182,13 @@ test_that("'hmd_joint' works with valid inputs", {
 
 ## 'hmd_tidy_data' ------------------------------------------------------------
 
-test_that("'hmd_tidy_data' works with valid inputs", {
+test_that("'hmd_tidy_data' works with valid inputs - year_min NULL", {
   data <- tibble::tribble(~Age, ~Year, ~sex,     ~country, ~type_age, ~mx, ~Lx,
                           0,    2001,  "both",   "a",      "1x1",     0.1, 2,
                           1,    2002,  "female", "b",      "5x1",     0.1, 2,
                           2,    2003,  "male",   "c",      "1x1",     0.1, 2,
                           3,    2004,  "both",   "d",      "1x1",     NA,  0)
-  ans_obtained <- hmd_tidy_data(data)
+  ans_obtained <- hmd_tidy_data(data, year_min = NULL)
   expect_setequal(names(ans_obtained),
                   c("age", "time", "sex", "country", "type_age", "mx", "Lx"))
   expect_identical(nrow(ans_obtained), 3L)
@@ -159,6 +199,26 @@ test_that("'hmd_tidy_data' works with valid inputs", {
                    factor(c("single", "lt", "single"),
                           levels = c("single", "five", "lt")))
 })
+
+test_that("'hmd_tidy_data' works with valid inputs - year_min supplied", {
+  data <- tibble::tribble(~Age, ~Year, ~sex,     ~country, ~type_age, ~mx, ~Lx,
+                          0,    2001,  "both",   "a",      "1x1",     0.1, 2,
+                          0,    2002,  "both",   "a",      "1x1",     0.1, 2,
+                          1,    2002,  "female", "b",      "5x1",     0.1, 2,
+                          2,    2003,  "male",   "c",      "1x1",     0.1, 2,
+                          3,    2004,  "both",   "d",      "1x1",     NA,  0)
+  ans_obtained <- hmd_tidy_data(data, year_min = 2002)
+  expect_setequal(names(ans_obtained),
+                  c("age", "time", "sex", "country", "type_age", "mx", "Lx"))
+  expect_identical(nrow(ans_obtained), 3L)
+  expect_identical(ans_obtained$sex,
+                   factor(c("Total", "Female", "Male"),
+                          levels = c("Total", "Female", "Male")))
+  expect_identical(ans_obtained$type_age,
+                   factor(c("single", "lt", "single"),
+                          levels = c("single", "five", "lt")))
+})
+
 
 
 ## 'hmd_total' ----------------------------------------------------------------
@@ -178,7 +238,7 @@ test_that("'hmd_total' works with valid inputs", {
                             type_age = c("single", "five"),
                             age_open = 50))
   data$mx <- runif(n = nrow(data))
-  ans_obtained <- hmd_total(data, n_comp = 6)
+  ans_obtained <- hmd_total(data, n_comp = 6, eps = 0.0001)
   expect_setequal(names(ans_obtained),
                   c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
   expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
@@ -187,24 +247,56 @@ test_that("'hmd_total' works with valid inputs", {
 
 ## 'hmd_unzip' ----------------------------------------------------------------
 
-test_that("'hmd_unzip' works with valid inputs - unzipped has hmd_statistics_test folder", {
-  fn <- system.file("extdata", "hmd_statistics_subset.zip", package = "bssvd")
-  ans <- hmd_unzip(fn)
+test_that("'hmd_unzip' works with data from 2024-02-26", {
+  fn <- system.file("extdata", "hmd_statistics_20240226_subset.zip", package = "bssvd")
+  ans_obtained <- hmd_unzip(fn, date = "2024-02-26")
+  ans_expected <- hmd_unzip_v1(fn)
+  expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'hmd_unzip' works with data from 2025-09-25", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  ans_obtained <- hmd_unzip(fn, date = "2025-09-25")
+  ans_expected <- hmd_unzip_v2(fn)
+  expect_identical(ans_obtained, ans_expected)
+})
+
+test_that("'hmd_unzip' throws error with invalid date", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  expect_error(hmd_unzip(fn, date = "2020-01-01"),
+               "Internal error")  
+})
+
+
+## 'hmd_unzip_v1' -------------------------------------------------------------
+
+test_that("'hmd_unzip_v1' works with valid inputs - unzipped has hmd_statistics folder", {
+  fn <- system.file("extdata", "hmd_statistics_20240226_subset.zip", package = "bssvd")
+  ans <- hmd_unzip_v1(fn)
   expect_setequal(names(ans),
                   c("country", "Year", "Age", "mx", "Lx", "sex", "type_age"))
 })
 
-test_that("'hmd_unzip' works with valid inputs - unzipped does not have hmd_statistics_test folder", {
+test_that("'hmd_unzip_v1' works with valid inputs - unzipped does not have hmd_statistics folder", {
   fn <- file.path("data_for_tests", "hmd_statistics_test_no_folder.zip")
-  ans <- hmd_unzip(fn)
+  ans <- hmd_unzip_v1(fn)
   expect_setequal(names(ans),
                   c("country", "Year", "Age", "mx", "Lx", "sex", "type_age"))
 })
 
-test_that("'hmd_unzip' gives expected error when zipfile missing files", {
+test_that("'hmd_unzip_v1' gives expected error when zipfile missing files", {
   fn <- file.path("data_for_tests", "hmd_statistics_test_missing_files.zip")
-  expect_error(hmd_unzip(fn),
+  expect_error(hmd_unzip_v1(fn),
                "Did not get expected files when unzipped `zipfile`.")
+})
+
+## 'hmd_unzip_v2' --------------------------------------------------------------
+
+test_that("'hmd_unzip_v2' works with valid inputs - unzipped has hmd_statistics folder", {
+  fn <- system.file("extdata", "hmd_statistics_20250925_subset.zip", package = "bssvd")
+  ans <- hmd_unzip_v2(fn)
+  expect_setequal(names(ans),
+                  c("PopName", "Year", "Age", "mx", "Lx", "sex", "type_age"))
 })
 
 

@@ -1,4 +1,56 @@
 
+## 'calculate_coef_nosex' -----------------------------------------------------
+
+test_that("'calculate_coef_nosex' works with valid inputs - log", {
+  data <- tidy_hfd(asfr_subset)
+  suppressMessages(ans <- calculate_coef_nosex(data,
+                                               n_comp = 5L,
+                                               transform = "log",
+                                               eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+test_that("'calculate_coef_nosex' works with valid inputs - logit", {
+  data <- tidy_hfd(asfr_subset)
+  suppressMessages(ans <- calculate_coef_nosex(data,
+                                               n_comp = 5L,
+                                               transform = "logit",
+                                               eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans), c("country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+test_that("'calculate_coef_nosex' throws error withe invalid transform", {
+  data <- tidy_hfd(asfr_subset)
+  expect_error(calculate_coef_nosex(data,
+                                    n_comp = 5L,
+                                    transform = "wrong",
+                                    eps = 0.001),
+               "Internal error")
+})
+
+
+## 'calculate_coef_sex' -------------------------------------------------------
+
+test_that("'calculate_coef_sex' works with valid inputs", {
+  file <- system.file("extdata",
+                      "undesa_pd_2019_wmd_marital_status_subset.xlsx",
+                      package = "bssvd")
+  data <- tidy_wmd(file)
+  suppressMessages(ans <- calculate_coef_sex(data,
+                                             n_comp = 3,
+                                             transform = "logit",
+                                             eps = 0.001))
+  expect_true(tibble::is_tibble(ans))
+  expect_setequal(names(ans),
+                  c("sex", "country", "time", "component", "coef"))
+  expect_equal(mean(ans$coef), 0)
+})
+
+
 ## 'get_ages_max' -------------------------------------------------------------
 
 test_that("'get_ages_max' works", {
@@ -8,6 +60,70 @@ test_that("'get_ages_max' works", {
   ans_obtained <- get_ages_max(age, age_max = 70)
   ans_expected <- c(20L, 50L)
   expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'get_data_one' -------------------------------------------------------------
+
+test_that("'get_data_one' works", {
+  data <- data.frame(age = c("25-29", "20-24", "30-34", "30+"),
+                     val = 1:4)
+  labels_age <- c("20-24", "25-29", "30+")
+  ans_obtained <- get_data_one(data = data,
+                               labels_age = labels_age)
+  ans_expected <- data.frame(age = factor(c("20-24", "25-29", "30+")),
+                             val = c(2L, 1L, 4L))
+  expect_identical(ans_obtained, ans_expected)
+})
+
+
+## 'make_indep' ---------------------------------------------------------------
+
+test_that("'make_indep' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = c(poputils::age_labels(type = "five",
+                                                   min = 15,
+                                                   max = 65,
+                                                   open = TRUE),
+                              "60+"),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  labels_age <- lfp_make_labels_age(data = data, age_max = 65)
+  ans_obtained <- make_indep(data, labels_age = labels_age, n_comp = 5,
+                             transform = "logit", eps = 0.00001)
+  expect_setequal(names(ans_obtained),
+                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
+  expect_true(all(sapply(ans_obtained$matrix, is, "dgTMatrix")))
+  expect_identical(rownames(ans_obtained$matrix[[1]]),
+                   paste(ans_obtained$labels_sexgender[[1]],
+                         ans_obtained$labels_age[[1]],
+                         sep = "."))
+})
+
+
+## 'make_joint' ---------------------------------------------------------------
+
+test_that("'make_joint' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = c(poputils::age_labels(type = "five",
+                                                 min = 15,
+                                                 max = 65,
+                                                 open = TRUE),
+                              "60+"),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  labels_age <- lfp_make_labels_age(data = data, age_max = 65)
+  ans_obtained <- make_joint(data, labels_age = labels_age, n_comp = 5,
+                             transform = "logit", eps = 0.00001)
+  expect_setequal(names(ans_obtained),
+                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
+  expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
+  expect_identical(rownames(ans_obtained$matrix[[1]]),
+                   paste(ans_obtained$labels_sexgender[[1]],
+                         ans_obtained$labels_age[[1]],
+                         sep = "."))
 })
 
 
@@ -103,6 +219,29 @@ test_that("'make_matrix_and_offset' gives expected error when negative values", 
                  "`transform` is \"logit\" but `x` has 2 values greater than 1.")
 })
 
+## 'make_total' ---------------------------------------------------------------
+
+test_that("'make_total' works with valid inputs", {
+  data <- expand.grid(country = 1:2,
+                      sex = c("Female", "Male", "Total"),
+                      age = c(poputils::age_labels(type = "five",
+                                                 min = 15,
+                                                 max = 65,
+                                                 open = TRUE),
+                              "60+"),
+                      time = 2001:2005)
+  data$value <- runif(n = nrow(data))
+  labels_age <- lfp_make_labels_age(data = data, age_max = 65)
+  ans_obtained <- make_total(data, labels_age = labels_age, n_comp = 5,
+                             transform = "logit", eps = 0.00001)
+  expect_setequal(names(ans_obtained),
+                  c("type", "labels_age", "labels_sexgender", "matrix", "offset"))
+  expect_true(all(sapply(ans_obtained$matrix, is, "dgCMatrix")))
+  expect_identical(rownames(ans_obtained$matrix[[1]]),
+                   paste(ans_obtained$labels_age[[1]],
+                         sep = "."))
+})
+
 
 ## 'remove_cols_with_na' -----------------------------------------------------
 
@@ -122,9 +261,9 @@ test_that("'remove_cols_with_na' works when NAs present", {
 test_that("'replace_zeros' performs correctly with valid inputs", {
     x <- matrix(runif(n = 100, min = 0, max = 2), nrow = 5)
     x[sample(100, 10)] <- 0
-    ans_obtained <- replace_zeros(x)
-    expect_true(all(ans_obtained > 0))
-    expect_true(all(ans_obtained[x > 0] == x[x > 0]))
+    ans_obtained <- replace_zeros(x, eps = 0.01)
+    expect_true(all(ans_obtained > 0.01))
+    expect_true(all(ans_obtained[x > 0.01] == x[x > 0.01]))
 })
 
 
@@ -134,42 +273,9 @@ test_that("'replace_zeros_ones' performs correctly with valid inputs", {
     x <- matrix(runif(n = 100, min = 0, max = 1), nrow = 5)
     x[sample(100, 5)] <- 0
     x[sample(100, 5)] <- 1
-    ans_obtained <- replace_zeros_ones(x)
+    ans_obtained <- replace_zeros_ones(x, eps = 0.01)
     expect_true(all(ans_obtained > 0))
     expect_true(all(ans_obtained < 1))
-    expect_true(all(ans_obtained[(x > 0) & (x < 1)] == x[(x > 0) & (x < 1)]))
-})
-
-
-## 'trim_01' ------------------------------------------------------------------
-
-test_that("'trim_01' works with valid inputs", {
-  x <- c(0.5,  0, -0.1, NA, 1, Inf, 2, NaN, 0.4)
-  ans_expected <- trim_01(x)
-  ans_obtained <- c(0.5, 0.4, 0.4, NA, 0.5, 0.5, 0.5, NaN, 0.4)
-  expect_identical(ans_obtained, ans_expected)
-})
-
-test_that("'trim_01' works when x all NA", {
-  x <- rep(NA_real_, 5)
-  ans_expected <- trim_01(x)
-  ans_obtained <- x
-  expect_identical(ans_obtained, ans_expected)
-})
-
-test_that("'trim_01' works when x has length 0", {
-  x <- numeric()
-  ans_expected <- trim_01(x)
-  ans_obtained <- x
-  expect_identical(ans_obtained, ans_expected)
-})
-
-test_that("'trim_01' throws correct error needs to truncate but cannot", {
-  x <- c(0, -0.1, NA, 1, Inf, 2, NaN)
-  expect_error(trim_01(x),
-               "Unable to calculate truncated values.")
-  x <- c(0, NA)
-  expect_error(trim_01(x),
-               "Unable to calculate truncated values.")
+    expect_true(all(ans_obtained[(x > 0.01) & (x < .99)] == x[(x > 0.01) & (x < 0.99)]))
 })
 

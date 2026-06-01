@@ -1,4 +1,26 @@
 
+#' Census Data on School Attendance
+#'
+#' Data on school attendance rates,
+#' by age and sex, from censuses,
+#' assembled by the United Nations
+#' Statistics Division.
+#'
+#' @format
+#' A tibble with 7668 rows and with columns
+#' "Country or Area", "Year", "Area", "Sex",
+#' "Age", "School attendance", "Record Type",
+#' "Reliability", "Source Year", "Value",
+#' and "Value Footnotes"
+#'
+#' @source Downloaded from table
+#' "Population 5 to 24 years of age by school
+#' attendance, sex and urban/rural residence"
+#' from the "Population Censuses' Datasets (1995 - Present)"
+#' in the [Demographic Statistics Database](https://unstats.un.org/unsd/demographic-social/products/dyb/index.cshtml). Accessed 22 October 2025.
+"un_csa_subset"
+
+
 #' OECD Data on Labour Force Participation
 #'
 #' Data on labour force participation rates
@@ -50,3 +72,23 @@
 #' page of the Human Fertility Database.
 #' Accessed 12 April 2024.
 "asfr_subset"
+
+
+#' Country Codes
+#'
+#' Three-digit country codes, and
+#' country names,
+#' from UN_M49 standard.
+#'
+#' @format
+#' A tibble with 190 rows and with
+#' columns `country` and `code`.
+#'
+#' @source United Nations Statistics Division. (2024).
+#' Standard country or area codes for statistical
+#' use (M49). United Nations, Department of Economic
+#' and Social Affairs. Retrieved from
+#' https://unstats.un.org/unsd/methodology/m49/
+#' on 13 October 2025.
+"country_code"
+

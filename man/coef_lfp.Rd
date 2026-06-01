@@ -5,13 +5,21 @@
 \title{Obtain Coefficients from Scaled SVD of OCED
 Labour Force Participation Data}
 \usage{
-coef_lfp(data, n_comp = 5)
+coef_lfp(data, n_comp = 5, year_min = NULL, eps = 1e-05)
 }
 \arguments{
 \item{data}{A data frame containing OECD data.}
 
 \item{n_comp}{Number of SVD components
 to include in result. Default is \code{5}.}
+
+\item{year_min}{Only include data for
+\code{year_min} onwards. Ignored if
+\code{year_min} is \code{NULL} (the default).}
+
+\item{eps}{Parameter for truncating
+probabililities or rates.
+Default is \code{0.00001}.}
 }
 \value{
 A tibble
@@ -25,16 +33,25 @@ The coefficients are a
 scaled version of the \eqn{U} matrix
 from the SVD.
 }
+\section{Truncation and transformation}{
+
+
+Reported proportions outside \verb{(eps, 1-eps)}
+are shifted to \code{eps} or \code{1-eps}, and
+all values are logit-transformed,
+before the SVD is applied.
+}
+
 \examples{
 coef_lfp(oecd_lfp_subset)
 }
 \seealso{
 \itemize{
-\item \code{\link[=data_ssvd_hmd]{data_ssvd_hmd()}} Prepare data on fertility
-from the Human Mortality Database
-\item \code{\link[=coef_hfd]{coef_hfd()}} Obtain coefficients
-for Human Fertility Database data
-\item \code{\link[=coef_hmd]{coef_hmd()}} Obtain coefficients
-for Human Mortality Database data
+\item \code{\link[=data_ssvd_lfp]{data_ssvd_lfp()}} Put OECD labour
+force participation data
+into the format required by
+the \code{ssvd()} function in \pkg{bage}
+\item \code{\link[=tidy_lfp]{tidy_lfp()}} Format OECD labour force
+participation data into a tidy data frame.
 }
 }

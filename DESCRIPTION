@@ -24,12 +24,15 @@ Imports:
     cli,
     Matrix,
     poputils (>= 0.4.0),
+    readxl,
     tibble,
     vctrs (>= 0.0.7)
 Suggests:
+    bage,
+    rsdmx,
     testthat (>= 3.0.0),
     utils
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 URL: https://bayesiandemography.github.io/bssvd/
+Config/roxygen2/version: 8.0.0
