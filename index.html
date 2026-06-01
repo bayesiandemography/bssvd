@@ -7,12 +7,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Make Scaled SVD Objects • bssvd</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Make Scaled SVD Objects">
-<meta name="description" content='Based on data from international demographic databases, build objects of class "bage_ssvd", to be used with package bage. bssvd is a developer-focused package, and would not normally be used directly for data analysis.'>
-<meta property="og:description" content='Based on data from international demographic databases, build objects of class "bage_ssvd", to be used with package bage. bssvd is a developer-focused package, and would not normally be used directly for data analysis.'>
+<meta name="description" content="Build objects holding data on age profiles for demographic processes such as fertility, mortality, and labour force participation. The objects are constructed by performing singular value decompositions on data from international demographic databasaes. Package bssvd is designed to support package bage. It is developer-focused, and would not normally be used directly for data analysis.">
+<meta property="og:description" content="Build objects holding data on age profiles for demographic processes such as fertility, mortality, and labour force participation. The objects are constructed by performing singular value decompositions on data from international demographic databasaes. Package bssvd is designed to support package bage. It is developer-focused, and would not normally be used directly for data analysis.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">bssvd</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -50,15 +50,13 @@
 </h1></div>
 <!-- badges: start -->
 
-<p>Use data from international demographic databases to create objects that capture regularities in demographic rates.</p>
+<p>Use data from international demographic databases to create objects that describe regularities in demographic rates.</p>
 <p><strong>bssvd</strong> supports package <a href="https://github.com/bayesiandemography/bage" class="external-link">bage</a>, and is not intended to be used directly for data analysis.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of bssvd from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bayesiandemography/bssvd"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"bayesiandemography/bssvd"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -94,7 +92,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>John Bryant <br><small class="roles"> Author, maintainer </small>  </li>
+<li>John Bryant <br><small class="roles"> Author, maintainer </small>   </li>
 </ul>
 </div>
 
@@ -103,7 +101,7 @@
 <ul class="list-unstyled">
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
 <li><a href="https://github.com/bayesiandemography/bssvd/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/bayesiandemography/bssvd/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/bayesiandemography/bssvd?branch=main" class="external-link"><img src="https://codecov.io/gh/bayesiandemography/bssvd/branch/main/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://app.codecov.io/gh/bayesiandemography/bssvd" class="external-link"><img src="https://codecov.io/gh/bayesiandemography/bssvd/graph/badge.svg" alt="Codecov test coverage"></a></li>
 </ul>
 </div>
 
@@ -116,7 +114,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
